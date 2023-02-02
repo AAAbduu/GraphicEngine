@@ -28,6 +28,11 @@ void Line::setFromAtoB(const Vector3 & A, const Vector3 & B) {
 	//! A direction vector d
 	m_d = B - A;
 	m_d = m_d.normalize();
+	float mi_modulo = m_d.length();
+	if(mi_modulo < Constants::distance_epsilon)
+	printf("Están muy cerca!!");
+
+
 	/* =================== END YOUR CODE HERE ====================== */
 }
 
@@ -36,7 +41,7 @@ void Line::setFromAtoB(const Vector3 & A, const Vector3 & B) {
 Vector3 Line::at(float u) const {
 	Vector3 res;
 	/* =================== PUT YOUR CODE HERE ====================== */
-
+		res = (m_O + u*m_d);
 	/* =================== END YOUR CODE HERE ====================== */
 	return res;
 }
