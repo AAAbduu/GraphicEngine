@@ -17,6 +17,19 @@
 
 int BSpherePlaneIntersect(const BSphere *bs, Plane *pl) {
 	/* =================== PUT YOUR CODE HERE ====================== */
+	Vector3 p_c = bs->m_centre - pl->m_n;
+	float distance = abs(pl->m_n.dot(p_c));
+
+	if(bs->getRadius() >= distance){
+		return 2;
+
+	}
+
+	if(distance < bs->getRadius()){
+		return 1;
+	}
+
+	return 0;
 
 	/* =================== END YOUR CODE HERE ====================== */
 }
