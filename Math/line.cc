@@ -53,7 +53,7 @@ Vector3 Line::at(float u) const {
 float Line::paramDistance(const Vector3 & P) const {
 	float res = 0.0f;
 	/* =================== PUT YOUR CODE HERE ====================== */
-
+		res = m_d.dot(P-m_O) / m_d.dot(m_d); 
 	/* =================== END YOUR CODE HERE ====================== */
 	return res;
 }
@@ -66,7 +66,9 @@ float Line::paramDistance(const Vector3 & P) const {
 float Line::distance(const Vector3 & P) const {
 	float res = 0.0f;
 	/* =================== PUT YOUR CODE HERE ====================== */
-
+		float u0 = paramDistance(P);
+		Vector3 mi_vector = P - m_d * at(u0);
+		res = mi_vector.length();
 	/* =================== END YOUR CODE HERE ====================== */
 	return res;
 }
