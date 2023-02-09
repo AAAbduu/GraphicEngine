@@ -17,19 +17,16 @@
 
 int BSpherePlaneIntersect(const BSphere *bs, Plane *pl) {
 	/* =================== PUT YOUR CODE HERE ====================== */
-	Vector3 p_c = bs->m_centre - pl->m_n;
-	float distance = abs(pl->m_n.dot(p_c));
+	float distance  =  pl->signedDistance(bs->getPosition());
 
-	if(bs->getRadius() >= distance){
-		return 2;
+	if(bs->getRadius() >= abs(distance)){
+		return IINTERSECT;
 
 	}
-
-	if(distance < bs->getRadius()){
-		return 1;
+	if(distance < 0){
+		return -IREJECT;
 	}
-
-	return 0;
+	return IREJECT;
 
 	/* =================== END YOUR CODE HERE ====================== */
 }
@@ -42,6 +39,15 @@ int BSpherePlaneIntersect(const BSphere *bs, Plane *pl) {
 
 int  BBoxBBoxIntersect(const BBox *bba, const BBox *bbb ) {
 	/* =================== PUT YOUR CODE HERE ====================== */
+		Vector3 maxBBA = bba->m_max;
+		Vector3 minBBA = bba->m_min;
+		Vector3 maxBBB = bbb->m_max;
+		Vector3 minBBB = bbb->m_min;
+
+		for(int i = 0; i<3; i++){
+			if(minBBA[i] > maxBBB[i] || minBBB[i] > maxBBA[i]) return IREJECT;
+		}
+		return IINTERSECT;
 
 	/* =================== END YOUR CODE HERE ====================== */
 }
@@ -54,6 +60,33 @@ int  BBoxBBoxIntersect(const BBox *bba, const BBox *bbb ) {
 
 int  BBoxPlaneIntersect (const BBox *theBBox, Plane *thePlane) {
 	/* =================== PUT YOUR CODE HERE ====================== */
+		Vector3 pMax= theBBox->m_max;
+		Vector3 pMin= theBBox->m_min;
+
+		Vector3 pMin2 = theBBox->m_min;
+		pMin2[0] = pMax[0];
+		pMin2[2] = pMax[2];
+
+		Vector3 pMax2 = theBBox->m_max;
+		pMax2[0] = pMin[0];
+		pMax2[2] = pMin[2];
+
+		float distMax = thePlane->signedDistance(pMax);
+
+		float distMin = thePlane->signedDistance(pMin);
+
+		float distMax2 = thePlane->signedDistance(pMax2);
+
+		float distMin2 = thePlane->signedDistance(pMin2);
+
+		if ((distMin >= 0 && distMax <= 0) || (distMin <= 0 && distMax >= 0)) return IINTERSECT;
+
+		if ((distMin2 >= 0 && distMax2 <= 0) || (distMin2 <= 0 && distMax2 >= 0)) return IINTERSECT;
+
+		
+		if (distMin < 0 and distMax < 0) return -IREJECT;
+
+		return IREJECT;
 
 	/* =================== END YOUR CODE HERE ====================== */
 }
