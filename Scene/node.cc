@@ -420,7 +420,19 @@ void Node::draw() {
 		BBoxGL::draw( m_containerWC);
 	}
 	/* =================== PUT YOUR CODE HERE ====================== */
+	rs->push(RenderState::modelview);
+	rs->addTrfm(RenderState::modelview, T);
 
+	//Push meter transformacion en la modelview
+	//si no res hoja{Dibujo el objeto geometrico}
+	//Sino llamada recursiva con los hijos
+	// pop
+	//SI el nodo tiene un objeto{gobj->draw();}
+	//else for (auto n: m_chilren){n->draw();}
+	//AL HACER ESTE COMMIT INDICAR MODO LOCAL
+	
+	
+	rs->pop(RenderState::modelview);
 	/* =================== END YOUR CODE HERE ====================== */
 
 	if (prev_shader != 0) {
