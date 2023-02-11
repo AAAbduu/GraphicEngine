@@ -6,14 +6,14 @@
 #include "tools.h"
 #include "trfm3D.h"
 
-
 Trfm3D::Trfm3D() : m_c1(Vector3::UNIT_X), m_c2(Vector3::UNIT_Y), m_c3(Vector3::UNIT_Z),
 				   m_tr(Vector3::ZERO), m_d(Vector3::ZERO), m_scl(1.0f), m_w(1.0f) {}
 
-Trfm3D::Trfm3D(const Trfm3D & T) : m_c1(T.m_c1), m_c2(T.m_c2), m_c3(T.m_c3),
-								   m_tr(T.m_tr), m_d(T.m_d), m_scl(T.m_scl), m_w(T.m_w) {}
+Trfm3D::Trfm3D(const Trfm3D &T) : m_c1(T.m_c1), m_c2(T.m_c2), m_c3(T.m_c3),
+								  m_tr(T.m_tr), m_d(T.m_d), m_scl(T.m_scl), m_w(T.m_w) {}
 
-void Trfm3D::swap(Trfm3D & T) {
+void Trfm3D::swap(Trfm3D &T)
+{
 	m_c1.swap(T.m_c1);
 	m_c2.swap(T.m_c2);
 	m_c3.swap(T.m_c3);
@@ -23,17 +23,18 @@ void Trfm3D::swap(Trfm3D & T) {
 	std::swap(m_w, T.m_w);
 }
 
-void Trfm3D::clone( const Trfm3D &T ) {
+void Trfm3D::clone(const Trfm3D &T)
+{
 	m_c1 = T.m_c1;
 	m_c2 = T.m_c2;
 	m_c3 = T.m_c3;
 	m_tr = T.m_tr;
-	m_d  = T.m_d;
+	m_d = T.m_d;
 	m_scl = T.m_scl;
-	m_w  = T.m_w;
+	m_w = T.m_w;
 }
 
-void Trfm3D::clone( const Trfm3D *T ) {	clone(*T); }
+void Trfm3D::clone(const Trfm3D *T) { clone(*T); }
 
 ////////////////////////////////////////////////////////////////////////////////////
 // Transform points, vectors, planes ...
@@ -44,10 +45,14 @@ void Trfm3D::clone( const Trfm3D *T ) {	clone(*T); }
 //   - suppose that m_d == (0,0,0)
 //   - suppose that m_w == 1
 
-Vector3 Trfm3D::transformPoint(const Vector3 & P) const {
+Vector3 Trfm3D::transformPoint(const Vector3 &P) const
+{
 	Vector3 res;
 	/* =================== PUT YOUR CODE HERE ====================== */
-		
+	for (int i = 0; i < 3; i++)
+	{
+		res[i] = P[0] * m_c1[i] * m_scl + P[1] * m_c2[i] * m_scl + P[2] * m_c3[i] * m_scl + m_tr[i];
+	}
 	/* =================== END YOUR CODE HERE ====================== */
 	return res;
 }
@@ -60,16 +65,21 @@ Vector3 Trfm3D::transformPoint(const Vector3 & P) const {
 //
 //  also remember: vectors don't translate
 
-Vector3 Trfm3D::transformVector(const Vector3 & V) const {
+Vector3 Trfm3D::transformVector(const Vector3 &V) const
+{
 	Vector3 res;
 	/* =================== PUT YOUR CODE HERE ====================== */
-		Trfm3D auxTrfm(*this);
-		res = auxTrfm.transformVector(V);
+	Trfm3D auxTrfm(*this);
+	for (int i = 0; i < 3; i++)
+	{
+		res[i] = V[0] * m_c1[i] * m_scl + V[1] * m_c2[i] * m_scl + V[2] * m_c3[i] * m_scl;
+	}
 	/* =================== END YOUR CODE HERE ====================== */
 	return res;
 }
 
-Vector3 Trfm3D::transformNormal(const Vector3 & N) const {
+Vector3 Trfm3D::transformNormal(const Vector3 &N) const
+{
 	// this = M = S*R*T = S*R (no translations to normals)
 	// auxTrfm = (M^{-1})^{T} == S^{-1}*R
 	Trfm3D auxTrfm(*this);
@@ -77,15 +87,17 @@ Vector3 Trfm3D::transformNormal(const Vector3 & N) const {
 	auxTrfm.m_tr = Vector3::ZERO;
 	// X = aurTrfm*N = S^{-1}*R*N
 	Vector3 X = auxTrfm.transformVector(N);
-	if ( m_scl != 1.0) {
+	if (m_scl != 1.0)
+	{
 		X = X.normalize();
 	}
 	return X;
 }
 
-void Trfm3D::transformPlane(Plane * plane) const {
-	Vector3 & pnormal = plane->m_n;
-	float & pd = plane->m_d;
+void Trfm3D::transformPlane(Plane *plane) const
+{
+	Vector3 &pnormal = plane->m_n;
+	float &pd = plane->m_d;
 	// this  == M = S*R*T = S*R (no translations to normals)
 	// auxTrfm = (M^{-1})^{T} == S^{-1}*R
 	Trfm3D auxTrfm(*this);
@@ -96,7 +108,8 @@ void Trfm3D::transformPlane(Plane * plane) const {
 	auxTrfm.transformVector(X);
 	// d1 =  d + T*X
 	float d1 = pd + m_tr.dot(X);
-	if (m_scl != 1.0) {
+	if (m_scl != 1.0)
+	{
 		// normalize X
 		float factor = X.length();
 		X = X.normalize();
@@ -106,7 +119,8 @@ void Trfm3D::transformPlane(Plane * plane) const {
 	pd = d1;
 }
 
-Vector3 Trfm3D::projectPoint(const Vector3 & P) const {
+Vector3 Trfm3D::projectPoint(const Vector3 &P) const
+{
 
 	Vector3 tmpV;
 	float tmpW;
@@ -114,21 +128,24 @@ Vector3 Trfm3D::projectPoint(const Vector3 & P) const {
 
 	scale = m_scl;
 
-	//Px' = Px*m_c1[0] + Py*m_c2[0] + Pz*m_c3[0] + m_tr[0]
+	// Px' = Px*m_c1[0] + Py*m_c2[0] + Pz*m_c3[0] + m_tr[0]
 	tmpV[0] = P[0] * m_c1[0] * scale + P[1] * m_c2[0] * scale + P[2] * m_c3[0] * scale + m_tr[0];
 
-	//Py' = Px*m_c1[1]*scale + Py*m_c2[1]*scale + Pz*m_c3[1]*scale + m_tr[1]
+	// Py' = Px*m_c1[1]*scale + Py*m_c2[1]*scale + Pz*m_c3[1]*scale + m_tr[1]
 	tmpV[1] = P[0] * m_c1[1] * scale + P[1] * m_c2[1] * scale + P[2] * m_c3[1] * scale + m_tr[1];
 
-	//Pz' = Px*m_c1[2]*scale + Py*m_c2[2]*scale + Pz*m_c3[2]*scale + m_tr[2]
+	// Pz' = Px*m_c1[2]*scale + Py*m_c2[2]*scale + Pz*m_c3[2]*scale + m_tr[2]
 	tmpV[2] = P[0] * m_c1[2] * scale + P[1] * m_c2[2] * scale + P[2] * m_c3[2] * scale + m_tr[2];
 
-	//Pw' = Px * dx + Py * dy + Pz * dz + dw
+	// Pw' = Px * dx + Py * dy + Pz * dz + dw
 	tmpW = P[0] * m_d[0] + P[1] * m_d[1] + P[2] * m_d[2] + m_w;
 
-	if(distance_is_zero(tmpW)) {
+	if (distance_is_zero(tmpW))
+	{
 		fprintf(stderr, "[W] Trfm3D::projectPoint: zero W\n");
-	} else {
+	}
+	else
+	{
 		tmpV /= tmpW;
 	}
 	return tmpV;
@@ -136,15 +153,16 @@ Vector3 Trfm3D::projectPoint(const Vector3 & P) const {
 
 // Compute this*add and leave the result in this
 
-void Trfm3D::add( const Trfm3D &T ) {
+void Trfm3D::add(const Trfm3D &T)
+{
 
-	float    newR1X, newR1Y, newR1Z;
-	float    newR2X, newR2Y, newR2Z;
-	float    newR3X, newR3Y, newR3Z;
+	float newR1X, newR1Y, newR1Z;
+	float newR2X, newR2Y, newR2Z;
+	float newR3X, newR3Y, newR3Z;
 
-	float    newDX, newDY, newDZ, newDW;
+	float newDX, newDY, newDZ, newDW;
 
-	float    newTrX, newTrY, newTrZ;
+	float newTrX, newTrY, newTrZ;
 
 	float c10 = m_c1[0];
 	float c11 = m_c1[1];
@@ -166,51 +184,51 @@ void Trfm3D::add( const Trfm3D &T ) {
 	newR1X += c10 * T.m_c1[0];
 	newR1X += c20 * T.m_c1[1];
 	newR1X += c30 * T.m_c1[2];
-	newR1X += tr0 * T.m_d[0] ;
+	newR1X += tr0 * T.m_d[0];
 
 	newR1Y += c11 * T.m_c1[0];
 	newR1Y += c21 * T.m_c1[1];
 	newR1Y += c31 * T.m_c1[2];
-	newR1Y += tr1 * T.m_d[0] ;
+	newR1Y += tr1 * T.m_d[0];
 
 	newR1Z += c12 * T.m_c1[0];
 	newR1Z += c22 * T.m_c1[1];
 	newR1Z += c32 * T.m_c1[2];
-	newR1Z += tr2 * T.m_d[0] ;
+	newR1Z += tr2 * T.m_d[0];
 
 	newR2X = newR2Y = newR2Z = 0.0;
 
 	newR2X += c10 * T.m_c2[0];
 	newR2X += c20 * T.m_c2[1];
 	newR2X += c30 * T.m_c2[2];
-	newR2X += tr0 * T.m_d[1] ;
+	newR2X += tr0 * T.m_d[1];
 
 	newR2Y += c11 * T.m_c2[0];
 	newR2Y += c21 * T.m_c2[1];
 	newR2Y += c31 * T.m_c2[2];
-	newR2Y += tr1 * T.m_d[1] ;
+	newR2Y += tr1 * T.m_d[1];
 
 	newR2Z += c12 * T.m_c2[0];
 	newR2Z += c22 * T.m_c2[1];
 	newR2Z += c32 * T.m_c2[2];
-	newR2Z += tr2 * T.m_d[1] ;
+	newR2Z += tr2 * T.m_d[1];
 
 	newR3X = newR3Y = newR3Z = 0.0;
 
 	newR3X += c10 * T.m_c3[0];
 	newR3X += c20 * T.m_c3[1];
 	newR3X += c30 * T.m_c3[2];
-	newR3X += tr0 * T.m_d[2] ;
+	newR3X += tr0 * T.m_d[2];
 
 	newR3Y += c11 * T.m_c3[0];
 	newR3Y += c21 * T.m_c3[1];
 	newR3Y += c31 * T.m_c3[2];
-	newR3Y += tr1 * T.m_d[2] ;
+	newR3Y += tr1 * T.m_d[2];
 
 	newR3Z += c12 * T.m_c3[0];
 	newR3Z += c22 * T.m_c3[1];
 	newR3Z += c32 * T.m_c3[2];
-	newR3Z += tr2 * T.m_d[2] ;
+	newR3Z += tr2 * T.m_d[2];
 
 	newDX = newDY = newDZ = newDW = 0.0;
 
@@ -280,39 +298,42 @@ void Trfm3D::add( const Trfm3D &T ) {
 	this->m_d[1] = newDY;
 	this->m_d[2] = newDZ;
 	this->m_w = newDW;
-
 }
 
-void Trfm3D::add(const Trfm3D * T ) { add(*T); }
+void Trfm3D::add(const Trfm3D *T) { add(*T); }
 
-Trfm3D operator *(const Trfm3D & lhs, const Trfm3D & rhs) {
+Trfm3D operator*(const Trfm3D &lhs, const Trfm3D &rhs)
+{
 	Trfm3D res(lhs);
 	res.add(rhs);
 	return res;
 }
 
-void Trfm3D::operator *=(const Trfm3D & rhs) {
+void Trfm3D::operator*=(const Trfm3D &rhs)
+{
 	add(rhs);
 }
 
-void Trfm3D::operator *=(const Trfm3D * rhs) {
+void Trfm3D::operator*=(const Trfm3D *rhs)
+{
 	add(*rhs);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
 // Obtain OpenGL matrix (float[16]) which is equivalent to Trfm3D
 
-void Trfm3D::getGLMatrix(float *glmatrix) const {
-	glmatrix[0]  = m_c1[0] * m_scl;
-	glmatrix[1]  = m_c1[1] * m_scl;
-	glmatrix[2]  = m_c1[2] * m_scl;
-	glmatrix[3]  = m_d[0];
-	glmatrix[4]  = m_c2[0] * m_scl;
-	glmatrix[5]  = m_c2[1] * m_scl;
-	glmatrix[6]  = m_c2[2] * m_scl;
-	glmatrix[7]  = m_d[1];
-	glmatrix[8]  = m_c3[0] * m_scl;
-	glmatrix[9]  = m_c3[1] * m_scl;
+void Trfm3D::getGLMatrix(float *glmatrix) const
+{
+	glmatrix[0] = m_c1[0] * m_scl;
+	glmatrix[1] = m_c1[1] * m_scl;
+	glmatrix[2] = m_c1[2] * m_scl;
+	glmatrix[3] = m_d[0];
+	glmatrix[4] = m_c2[0] * m_scl;
+	glmatrix[5] = m_c2[1] * m_scl;
+	glmatrix[6] = m_c2[2] * m_scl;
+	glmatrix[7] = m_d[1];
+	glmatrix[8] = m_c3[0] * m_scl;
+	glmatrix[9] = m_c3[1] * m_scl;
 	glmatrix[10] = m_c3[2] * m_scl;
 	glmatrix[11] = m_d[2];
 	glmatrix[12] = m_tr[0];
@@ -321,43 +342,46 @@ void Trfm3D::getGLMatrix(float *glmatrix) const {
 	glmatrix[15] = m_w;
 }
 
-
 ////////////////////////////////////////////////////////////////////////////////////
 // Set functions
 
-void Trfm3D::setUnit() {
+void Trfm3D::setUnit()
+{
 	Trfm3D T;
 	swap(T);
 }
 
-void Trfm3D::setRotX(float angle) {
-	m_c1 = Vector3( 1.0f,  0.0f,         0.0f );
-	m_c2 = Vector3( 0.0f,  cosf(angle),  sinf(angle) );
-	m_c3 = Vector3( 0.0f, -sinf(angle ), cosf(angle) );
+void Trfm3D::setRotX(float angle)
+{
+	m_c1 = Vector3(1.0f, 0.0f, 0.0f);
+	m_c2 = Vector3(0.0f, cosf(angle), sinf(angle));
+	m_c3 = Vector3(0.0f, -sinf(angle), cosf(angle));
 	m_scl = 1.0f;
 	m_tr = Vector3::ZERO;
 	m_d = Vector3::ZERO;
-	m_w  = 1.0f;
+	m_w = 1.0f;
 }
 
-void Trfm3D::setRotY(float angle ) {
-	m_c1 = Vector3( cosf(angle),  0.0f, -sinf(angle) );
-	m_c2 = Vector3( 0.0f,         1.0f,   0.0f );
-	m_c3 = Vector3( sinf(angle),  0.0f,  cosf(angle) );
+void Trfm3D::setRotY(float angle)
+{
+	m_c1 = Vector3(cosf(angle), 0.0f, -sinf(angle));
+	m_c2 = Vector3(0.0f, 1.0f, 0.0f);
+	m_c3 = Vector3(sinf(angle), 0.0f, cosf(angle));
 	m_scl = 1.0f;
 	m_tr = Vector3::ZERO;
 	m_d = Vector3::ZERO;
-	m_w  = 1.0f;
+	m_w = 1.0f;
 }
 
-void Trfm3D::setRotZ(float angle ) {
-	m_c1 = Vector3(  cosf(angle), sinf(angle), 0.0f );
-	m_c2 = Vector3( -sinf(angle), cos(angle),  0.0f );
-	m_c3 = Vector3(  0.0f,         0.0f,       1.0f );
+void Trfm3D::setRotZ(float angle)
+{
+	m_c1 = Vector3(cosf(angle), sinf(angle), 0.0f);
+	m_c2 = Vector3(-sinf(angle), cos(angle), 0.0f);
+	m_c3 = Vector3(0.0f, 0.0f, 1.0f);
 	m_scl = 1.0f;
 	m_tr = Vector3::ZERO;
 	m_d = Vector3::ZERO;
-	m_w  = 1.0f;
+	m_w = 1.0f;
 }
 
 /*
@@ -368,7 +392,8 @@ void Trfm3D::setRotZ(float angle ) {
   Assume right hand coordinate system.
 */
 
-void Trfm3D::setRotVec(const Vector3 & VV, float theta ) {
+void Trfm3D::setRotVec(const Vector3 &VV, float theta)
+{
 
 	Vector3 V(VV);
 	V = V.normalize();
@@ -390,77 +415,91 @@ void Trfm3D::setRotVec(const Vector3 & VV, float theta ) {
 	m_tr = Vector3::ZERO;
 	m_d = Vector3::ZERO;
 	m_scl = 1.0f;
-	m_w  = 1.0f;
+	m_w = 1.0f;
 }
 
-
-void Trfm3D::setTrans(const Vector3 & tr) {
+void Trfm3D::setTrans(const Vector3 &tr)
+{
 	m_c1 = Vector3::UNIT_X;
 	m_c2 = Vector3::UNIT_Y;
 	m_c3 = Vector3::UNIT_Z;
 	m_tr = tr;
 	m_d = Vector3::ZERO;
 	m_scl = 1.0f;
-	m_w  = 1.0f;
+	m_w = 1.0f;
 }
 
-void Trfm3D::setScale(float scale ) {
+void Trfm3D::setScale(float scale)
+{
 	m_c1 = Vector3::UNIT_X;
 	m_c2 = Vector3::UNIT_Y;
 	m_c3 = Vector3::UNIT_Z;
 	m_tr = Vector3::ZERO;
 	m_d = Vector3::ZERO;
 	m_scl = scale;
-	m_w  = 1.0f;
+	m_w = 1.0f;
 }
 
 // @@ TODO: Rotate angle radians about an axis defined by vector and located at point
 //
 
-void Trfm3D::setRotAxis(const Vector3 & V, const Vector3 & P, float angle ) {
+void Trfm3D::setRotAxis(const Vector3 &V, const Vector3 &P, float angle)
+{
 	/* =================== PUT YOUR CODE HERE ====================== */
-		Trfm3D auxTrfm(*this);
+	Trfm3D auxTrfm(*this);
 
-		Trfm3D Tp;
-		Trfm3D R;
-		Trfm3D T_p;
+	Trfm3D Tp;
+	Trfm3D R;
+	Trfm3D T_p;
 
-		Tp.setTrans(P);
-		R.setRotVec(V,angle);
-		Vector3 _p;
-		_p.x() = - P.x();
-		_p.y() = - P.y();  
-		_p.z() = - P.z();  
-		T_p.setTrans(_p);
+	Tp.setTrans(P);
+	R.setRotVec(V, angle);
+	Vector3 _p;
+	_p.x() = -P.x();
+	_p.y() = -P.y();
+	_p.z() = -P.z();
+	T_p.setTrans(_p);
 
-		auxTrfm.add(Tp);
-		auxTrfm.add(R);
-		auxTrfm.add(T_p);
+	auxTrfm.add(Tp);
+	auxTrfm.add(R);
+	auxTrfm.add(T_p);
 
 	/* =================== END YOUR CODE HERE ====================== */
 }
 
-
 void Trfm3D::setOrtho(float left, float right,
 					  float bottom, float top,
-					  float near, float far) {
+					  float near, float far)
+{
 	m_scl = 1.0f;
-	float a =  2.0f / (right - left) ;
-	float b =  2.0f / (top - bottom) ;
-	float c = -2.0f / (far - near) ;
-	float tx = (right + left) / (right - left) ;
-	float ty = (top + bottom) / (top - bottom) ;
-	float tz = (far + near) / (far - near) ;
-	m_c1[0] = a;    m_c2[0] = 0.0f;  m_c3[0] = 0.0f; m_tr[0] = -tx;
-	m_c1[1] = 0.0f; m_c2[1] = b;     m_c3[1] = 0.0f; m_tr[1] = -ty;
-	m_c1[2] = 0.0f; m_c2[2] = 0.0f;  m_c3[2] = c;    m_tr[2] = -tz;
-	m_d[0]  = 0.0f; m_d[1]  = 0.0f;  m_d[2]  = 0.0f; m_w  = 1.0f;
-
+	float a = 2.0f / (right - left);
+	float b = 2.0f / (top - bottom);
+	float c = -2.0f / (far - near);
+	float tx = (right + left) / (right - left);
+	float ty = (top + bottom) / (top - bottom);
+	float tz = (far + near) / (far - near);
+	m_c1[0] = a;
+	m_c2[0] = 0.0f;
+	m_c3[0] = 0.0f;
+	m_tr[0] = -tx;
+	m_c1[1] = 0.0f;
+	m_c2[1] = b;
+	m_c3[1] = 0.0f;
+	m_tr[1] = -ty;
+	m_c1[2] = 0.0f;
+	m_c2[2] = 0.0f;
+	m_c3[2] = c;
+	m_tr[2] = -tz;
+	m_d[0] = 0.0f;
+	m_d[1] = 0.0f;
+	m_d[2] = 0.0f;
+	m_w = 1.0f;
 }
 
 void Trfm3D::setFrustum(float left, float right,
 						float bottom, float top,
-						float near, float far) {
+						float near, float far)
+{
 	float x, y, a, b, c, d;
 	x = (2.0f * near) / (right - left);
 	y = (2.0f * near) / (top - bottom);
@@ -469,29 +508,43 @@ void Trfm3D::setFrustum(float left, float right,
 	c = -(far + near) / (far - near);
 	d = -(2.0f * far * near) / (far - near);
 	m_scl = 1.0f;
-	m_c1[0] = x;    m_c2[0] = 0.0f;  m_c3[0] = a;     m_tr[0] = 0.0f;
-	m_c1[1] = 0.0f; m_c2[1] = y;     m_c3[1] = b;     m_tr[1] = 0.0f;
-	m_c1[2] = 0.0f; m_c2[2] = 0.0f;  m_c3[2] = c;     m_tr[2] = d;
-	m_d[0]  = 0.0f; m_d[1]  = 0.0f;  m_d[2]  = -1.0f; m_w  = 0.0f;
+	m_c1[0] = x;
+	m_c2[0] = 0.0f;
+	m_c3[0] = a;
+	m_tr[0] = 0.0f;
+	m_c1[1] = 0.0f;
+	m_c2[1] = y;
+	m_c3[1] = b;
+	m_tr[1] = 0.0f;
+	m_c1[2] = 0.0f;
+	m_c2[2] = 0.0f;
+	m_c3[2] = c;
+	m_tr[2] = d;
+	m_d[0] = 0.0f;
+	m_d[1] = 0.0f;
+	m_d[2] = -1.0f;
+	m_w = 0.0f;
 }
 
-void Trfm3D::setLocal2World(const Vector3 & P,
-							const Vector3 & R,
-							const Vector3 & U,
-							const Vector3 & D) {
+void Trfm3D::setLocal2World(const Vector3 &P,
+							const Vector3 &R,
+							const Vector3 &U,
+							const Vector3 &D)
+{
 	m_c1 = R;
 	m_c2 = U;
 	m_c3 = D;
 	m_tr = P;
 	m_scl = 1.0;
 	m_d = Vector3::ZERO;
-	m_w  = 1.0f;
+	m_w = 1.0f;
 }
 
-void Trfm3D::setWorld2Local(const Vector3 & P,
-							const Vector3 & R,
-							const Vector3 & U,
-							const Vector3 & D) {
+void Trfm3D::setWorld2Local(const Vector3 &P,
+							const Vector3 &R,
+							const Vector3 &U,
+							const Vector3 &D)
+{
 	m_c1[0] = R[0];
 	m_c1[1] = U[0];
 	m_c1[2] = D[0];
@@ -510,10 +563,11 @@ void Trfm3D::setWorld2Local(const Vector3 & P,
 
 	m_scl = 1.0f;
 	m_d = Vector3::ZERO;
-	m_w  = 1.0f;
+	m_w = 1.0f;
 }
 
-void Trfm3D::setWorld2LocalFrame(const Trfm3D &frameTrfm) {
+void Trfm3D::setWorld2LocalFrame(const Trfm3D &frameTrfm)
+{
 
 	m_c1[0] = frameTrfm.m_c1[0];
 	m_c1[1] = frameTrfm.m_c2[0];
@@ -534,14 +588,15 @@ void Trfm3D::setWorld2LocalFrame(const Trfm3D &frameTrfm) {
 	m_d = Vector3::ZERO;
 	m_scl = 1.0;
 	m_w = 1.0f;
-
 }
 
-void Trfm3D::setWorld2LocalFrame(const Trfm3D *frameTrfm) {
+void Trfm3D::setWorld2LocalFrame(const Trfm3D *frameTrfm)
+{
 	setWorld2LocalFrame(*frameTrfm);
 }
 
-void Trfm3D::normalize() {
+void Trfm3D::normalize()
+{
 	/*   Column1=Normalized(CrossProduct(Column2,Column3)); */
 	/*   Column2=Normalized(CrossProduct(Column3,Column1)); */
 	/*   Normalize(Column3); */
@@ -550,44 +605,49 @@ void Trfm3D::normalize() {
 	m_c3 = m_c3.normalize();
 }
 
-
 ////////////////////////////////////////////////////////////////////////////////////
 // Add functions
 
-void Trfm3D::addRotX(float angle ) {
+void Trfm3D::addRotX(float angle)
+{
 	Trfm3D localT;
-	localT.setRotX(angle );
+	localT.setRotX(angle);
 	add(localT);
 }
 
-void Trfm3D::addRotY(float angle ) {
+void Trfm3D::addRotY(float angle)
+{
 	Trfm3D localT;
 	localT.setRotY(angle);
 	add(localT);
 }
 
-void Trfm3D::addRotZ(float angle ) {
+void Trfm3D::addRotZ(float angle)
+{
 	Trfm3D localT;
 	localT.setRotZ(angle);
 	add(localT);
 }
 
-void Trfm3D::addRotVec(const Vector3 & V,
-					   float theta ) {
+void Trfm3D::addRotVec(const Vector3 &V,
+					   float theta)
+{
 	Trfm3D localT;
 	localT.setRotVec(V, theta);
 	add(localT);
 }
 
-void Trfm3D::addRotAxis(const Vector3 & V,
-						const Vector3 & P,
-						float angle) {
+void Trfm3D::addRotAxis(const Vector3 &V,
+						const Vector3 &P,
+						float angle)
+{
 	Trfm3D localT;
 	localT.setRotAxis(V, P, angle);
 	add(localT);
 }
 
-void Trfm3D::addTrans(const Vector3 & T) {
+void Trfm3D::addTrans(const Vector3 &T)
+{
 
 	m_tr[0] += T[0] * m_scl * m_c1[0];
 	m_tr[0] += T[1] * m_scl * m_c2[0];
@@ -602,73 +662,92 @@ void Trfm3D::addTrans(const Vector3 & T) {
 	m_tr[2] += T[2] * m_scl * m_c3[2];
 }
 
-void Trfm3D::addScale(float scale) {
+void Trfm3D::addScale(float scale)
+{
 	m_scl *= scale;
 }
 
-void Trfm3D::addFrustum( float left, float right,
-						 float top, float bottom,
-						 float near, float far) {
+void Trfm3D::addFrustum(float left, float right,
+						float top, float bottom,
+						float near, float far)
+{
 	Trfm3D localT;
 	localT.setFrustum(left, right, top, bottom, near, far);
 	add(localT);
 }
 
-
-void Trfm3D::addWorld2Local(const Vector3 & P,
-							const Vector3 & R,
-							const Vector3 & U,
-							const Vector3 & D) {
+void Trfm3D::addWorld2Local(const Vector3 &P,
+							const Vector3 &R,
+							const Vector3 &U,
+							const Vector3 &D)
+{
 
 	Trfm3D localT;
 	localT.setWorld2Local(P, R, U, D);
 	add(localT);
 }
 
-void Trfm3D::addLocal2World(const Vector3 & P,
-							const Vector3 & R,
-							const Vector3 & U,
-							const Vector3 & D) {
+void Trfm3D::addLocal2World(const Vector3 &P,
+							const Vector3 &R,
+							const Vector3 &U,
+							const Vector3 &D)
+{
 
 	Trfm3D localT;
 	localT.setLocal2World(P, R, U, D);
 	add(localT);
 }
 
-
 ////////////////////////////////////////////////////////////////////////////////////
 // Misc
 
-int Trfm3D::cmp(const Trfm3D &rhs) const {
+int Trfm3D::cmp(const Trfm3D &rhs) const
+{
 
-	if (!distance_is_zero(m_c1[0] - rhs.m_c1[0])) return -2;
-	if (!distance_is_zero(m_c1[1] - rhs.m_c1[1])) return -2;
-	if (!distance_is_zero(m_c1[2] - rhs.m_c1[2])) return -2;
+	if (!distance_is_zero(m_c1[0] - rhs.m_c1[0]))
+		return -2;
+	if (!distance_is_zero(m_c1[1] - rhs.m_c1[1]))
+		return -2;
+	if (!distance_is_zero(m_c1[2] - rhs.m_c1[2]))
+		return -2;
 
-	if (!distance_is_zero(m_c2[0] - rhs.m_c2[0])) return -2;
-	if (!distance_is_zero(m_c2[1] - rhs.m_c2[1])) return -2;
-	if (!distance_is_zero(m_c2[2] - rhs.m_c2[2])) return -2;
+	if (!distance_is_zero(m_c2[0] - rhs.m_c2[0]))
+		return -2;
+	if (!distance_is_zero(m_c2[1] - rhs.m_c2[1]))
+		return -2;
+	if (!distance_is_zero(m_c2[2] - rhs.m_c2[2]))
+		return -2;
 
-	if (!distance_is_zero(m_c3[0] - rhs.m_c3[0])) return -2;
-	if (!distance_is_zero(m_c3[1] - rhs.m_c3[1])) return -2;
-	if (!distance_is_zero(m_c3[2] - rhs.m_c3[2])) return -2;
+	if (!distance_is_zero(m_c3[0] - rhs.m_c3[0]))
+		return -2;
+	if (!distance_is_zero(m_c3[1] - rhs.m_c3[1]))
+		return -2;
+	if (!distance_is_zero(m_c3[2] - rhs.m_c3[2]))
+		return -2;
 
-	if (!distance_is_zero(m_tr[0] - rhs.m_tr[0])) return -3;
-	if (!distance_is_zero(m_tr[1] - rhs.m_tr[1])) return -3;
-	if (!distance_is_zero(m_tr[2] - rhs.m_tr[2])) return -3;
+	if (!distance_is_zero(m_tr[0] - rhs.m_tr[0]))
+		return -3;
+	if (!distance_is_zero(m_tr[1] - rhs.m_tr[1]))
+		return -3;
+	if (!distance_is_zero(m_tr[2] - rhs.m_tr[2]))
+		return -3;
 
-	if (!distance_is_zero(m_scl - rhs.m_scl)) return -4;
+	if (!distance_is_zero(m_scl - rhs.m_scl))
+		return -4;
 
 	return 0;
 }
 
-int Trfm3D::cmp(const Trfm3D *rhs) const {
+int Trfm3D::cmp(const Trfm3D *rhs) const
+{
 
-	if (rhs == 0) return -1;
+	if (rhs == 0)
+		return -1;
 	return cmp(*rhs);
 }
 
-void Trfm3D::setInverse() {
+void Trfm3D::setInverse()
+{
 
 	//            | sR   T |
 	//      M   = |  0   1 |
@@ -680,12 +759,14 @@ void Trfm3D::setInverse() {
 	// Compute inv(R) = R^{T}
 
 	if (distance_is_zero(m_d[0]) || distance_is_zero(m_d[1]) ||
-		distance_is_zero(m_d[2]) || distance_is_zero(1.0f - m_w)) {
+		distance_is_zero(m_d[2]) || distance_is_zero(1.0f - m_w))
+	{
 		fprintf(stderr, "[E] Can't compute inverse on a projective Trfm3D!\n");
 		exit(1);
 	}
 
-	if (distance_is_zero(m_scl)) {
+	if (distance_is_zero(m_scl))
+	{
 		fprintf(stderr, "[E] Can't compute inverse: source Trfm3D has zero scale!\n");
 		exit(1);
 	}
@@ -693,21 +774,23 @@ void Trfm3D::setInverse() {
 	// Compute inv(S) = 1/s
 	auxTrfm.m_scl = 1.0f / m_scl;
 	// Compute inv(T) = -(1/s)R^{T}*T
-	auxTrfm.m_tr[0] = m_tr[0]*auxTrfm.m_c1[0] + m_tr[1]*auxTrfm.m_c2[0] + m_tr[2]*auxTrfm.m_c3[0];
-	auxTrfm.m_tr[0]*= -auxTrfm.m_scl;
-	auxTrfm.m_tr[1] = m_tr[0]*auxTrfm.m_c1[1] + m_tr[1]*auxTrfm.m_c2[1] + m_tr[2]*auxTrfm.m_c3[1];
-	auxTrfm.m_tr[1]*= -auxTrfm.m_scl;
-	auxTrfm.m_tr[2] = m_tr[0]*auxTrfm.m_c1[2] + m_tr[1]*auxTrfm.m_c2[2] + m_tr[2]*auxTrfm.m_c3[2];
-	auxTrfm.m_tr[2]*= -auxTrfm.m_scl;
+	auxTrfm.m_tr[0] = m_tr[0] * auxTrfm.m_c1[0] + m_tr[1] * auxTrfm.m_c2[0] + m_tr[2] * auxTrfm.m_c3[0];
+	auxTrfm.m_tr[0] *= -auxTrfm.m_scl;
+	auxTrfm.m_tr[1] = m_tr[0] * auxTrfm.m_c1[1] + m_tr[1] * auxTrfm.m_c2[1] + m_tr[2] * auxTrfm.m_c3[1];
+	auxTrfm.m_tr[1] *= -auxTrfm.m_scl;
+	auxTrfm.m_tr[2] = m_tr[0] * auxTrfm.m_c1[2] + m_tr[1] * auxTrfm.m_c2[2] + m_tr[2] * auxTrfm.m_c3[2];
+	auxTrfm.m_tr[2] *= -auxTrfm.m_scl;
 	// Store result
 	swap(auxTrfm);
 }
 
-Vector3 Trfm3D::getTranslation() const {
+Vector3 Trfm3D::getTranslation() const
+{
 	return m_tr;
 };
 
-void Trfm3D::abs() {
+void Trfm3D::abs()
+{
 
 	m_c1[0] = fabs(m_c1[0]);
 	m_c1[1] = fabs(m_c1[1]);
@@ -725,16 +808,17 @@ void Trfm3D::abs() {
 }
 
 // Aux
-void Trfm3D::print(const std::string & del) const {
-	printf( "%s%0.4f scale\n", del.c_str(), m_scl );
-	printf( "%s%0.4f %0.4f %0.4f  %0.4f\n",
-			del.c_str(), m_c1[0], m_c2[0], m_c3[0], m_tr[0] );
-	printf( "%s%0.4f %0.4f %0.4f  %0.4f\n",
-			del.c_str(), m_c1[1], m_c2[1], m_c3[1], m_tr[1] );
-	printf( "%s%0.4f %0.4f %0.4f  %0.4f\n",
-			del.c_str(), m_c1[2], m_c2[2], m_c3[2], m_tr[2] );
-	printf( "%s% 0.4f % 0.4f % 0.4f  %0.4f\n",
-			del.c_str(), m_d[0], m_d[1], m_d[2], m_w );
+void Trfm3D::print(const std::string &del) const
+{
+	printf("%s%0.4f scale\n", del.c_str(), m_scl);
+	printf("%s%0.4f %0.4f %0.4f  %0.4f\n",
+		   del.c_str(), m_c1[0], m_c2[0], m_c3[0], m_tr[0]);
+	printf("%s%0.4f %0.4f %0.4f  %0.4f\n",
+		   del.c_str(), m_c1[1], m_c2[1], m_c3[1], m_tr[1]);
+	printf("%s%0.4f %0.4f %0.4f  %0.4f\n",
+		   del.c_str(), m_c1[2], m_c2[2], m_c3[2], m_tr[2]);
+	printf("%s% 0.4f % 0.4f % 0.4f  %0.4f\n",
+		   del.c_str(), m_d[0], m_d[1], m_d[2], m_w);
 	printf("%s-------- -------- --------  ---\n",
 		   del.c_str());
 }
