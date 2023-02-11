@@ -271,12 +271,13 @@ void Node::addChild(Node *theChild) {
 	if (m_gObject) {
 		/* =================== PUT YOUR CODE HERE ====================== */
 		// node has a gObject, so print warning
+		printf("Node already has an object!");
 
 		/* =================== END YOUR CODE HERE ====================== */
 	} else {
 		/* =================== PUT YOUR CODE HERE ====================== */
 		// node does not have gObject, so attach child
-
+		theChild->attachGobject(m_gObject);
 		/* =================== END YOUR CODE HERE ====================== */
 
 	}
@@ -420,8 +421,8 @@ void Node::draw() {
 		BBoxGL::draw( m_containerWC);
 	}
 	/* =================== PUT YOUR CODE HERE ====================== */
-	rs->push(RenderState::modelview);
-	rs->addTrfm(RenderState::modelview, T);
+	
+	//rs->addTrfm(RenderState::modelview, T);
 
 	//Push meter transformacion en la modelview
 	//si no res hoja{Dibujo el objeto geometrico}
@@ -430,6 +431,19 @@ void Node::draw() {
 	//SI el nodo tiene un objeto{gobj->draw();}
 	//else for (auto n: m_chilren){n->draw();}
 	//AL HACER ESTE COMMIT INDICAR MODO LOCAL
+
+	if(m_gObject){
+		rs->push(RenderState::modelview);
+		rs->addTrfm(RenderState::modelview, m_placementWC);
+		rs->loadTrfm(RenderState::model, m_placementWC);
+		m_gObject->draw();
+		rs->pop(RenderState::modelview);
+	}
+	
+	for(auto & theChild : m_children) {
+		theChild->draw();
+	}
+	
 	
 	
 	rs->pop(RenderState::modelview);
