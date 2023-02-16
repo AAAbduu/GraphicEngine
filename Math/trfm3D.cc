@@ -456,11 +456,7 @@ void Trfm3D::setRotAxis(const Vector3 &V, const Vector3 &P, float angle)
 
 	Tp.setTrans(P);
 	R.setRotVec(V, angle);
-	Vector3 _p;
-	_p.x() = -P.x();
-	_p.y() = -P.y();
-	_p.z() = -P.z();
-	T_p.setTrans(_p);
+	T_p.addTrans(-1 * P);
 
 	auxTrfm.add(Tp);
 	auxTrfm.add(R);
