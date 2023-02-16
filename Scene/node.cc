@@ -7,8 +7,8 @@
 #include "renderState.h"
 #include "scene.h"
 
-using std::string;
 using std::list;
+using std::string;
 
 // Recipe 1: iterate through children:
 //
@@ -16,42 +16,46 @@ using std::list;
 //        theChild->print(); // or any other thing
 //    }
 
-Node::Node(const string &name) :
-	m_name(name),
-	m_parent(0),
-	m_gObject(0),
-	m_shader(0),
-	m_placement(new Trfm3D),
-	m_placementWC(new Trfm3D),
-	m_containerWC(new BBox),
-	m_checkCollision(true),
-	m_isCulled(false),
-	m_drawBBox(false) {}
+Node::Node(const string &name) : m_name(name),
+								 m_parent(0),
+								 m_gObject(0),
+								 m_shader(0),
+								 m_placement(new Trfm3D),
+								 m_placementWC(new Trfm3D),
+								 m_containerWC(new BBox),
+								 m_checkCollision(true),
+								 m_isCulled(false),
+								 m_drawBBox(false) {}
 
-Node::~Node() {
+Node::~Node()
+{
 	delete m_placement;
 	delete m_placementWC;
 	delete m_containerWC;
 }
 
-static string name_clone(const string & base) {
+static string name_clone(const string &base)
+{
 
 	static char MG_SC_BUFF[2048];
 	Node *aux;
 
 	int i;
-	for(i = 1; i < 1000; i++) {
+	for (i = 1; i < 1000; i++)
+	{
 		sprintf(MG_SC_BUFF, "%s#%d", base.c_str(), i);
 		string newname(MG_SC_BUFF);
 		aux = NodeManager::instance()->find(newname);
-		if(!aux) return newname;
+		if (!aux)
+			return newname;
 	}
 	fprintf(stderr, "[E] Node: too many clones of %s\n.", base.c_str());
 	exit(1);
 	return string();
 }
 
-Node* Node::cloneParent(Node *theParent) {
+Node *Node::cloneParent(Node *theParent)
+{
 
 	string newName = name_clone(m_name);
 	Node *newNode = NodeManager::instance()->create(newName);
@@ -60,26 +64,30 @@ Node* Node::cloneParent(Node *theParent) {
 	newNode->m_shader = m_shader;
 	newNode->m_placement->clone(m_placement);
 	newNode->m_parent = theParent;
-	for(auto & theChild : m_children) {
+	for (auto &theChild : m_children)
+	{
 		newNode->m_children.push_back(theChild->cloneParent(this));
 	}
 	return newNode;
 }
 
-
-Node *Node::clone() {
+Node *Node::clone()
+{
 	return cloneParent(0);
 }
 
 ///////////////////////////////////
 // transformations
 
-void Node::attachGobject(GObject *gobj ) {
-	if (!gobj) {
+void Node::attachGobject(GObject *gobj)
+{
+	if (!gobj)
+	{
 		fprintf(stderr, "[E] attachGobject: no gObject for node %s\n", m_name.c_str());
 		exit(1);
 	}
-	if (m_children.size()) {
+	if (m_children.size())
+	{
 		fprintf(stderr, "EW] Node::attachGobject: can not attach a gObject to node (%s), which already has children.\n", m_name.c_str());
 		exit(1);
 	}
@@ -87,29 +95,36 @@ void Node::attachGobject(GObject *gobj ) {
 	propagateBBRoot();
 }
 
-GObject *Node::detachGobject() {
+GObject *Node::detachGobject()
+{
 	GObject *res = m_gObject;
 	m_gObject = 0;
 	return res;
 }
 
-GObject *Node::getGobject() {
+GObject *Node::getGobject()
+{
 	return m_gObject;
 }
 
-void Node::attachLight(Light *theLight) {
-	if (!theLight) {
+void Node::attachLight(Light *theLight)
+{
+	if (!theLight)
+	{
 		fprintf(stderr, "[E] attachLight: no light for node %s\n", m_name.c_str());
 		exit(1);
 	}
 	m_lights.push_back(theLight);
 }
 
-int Node::detachLight(Light *theLight) {
+int Node::detachLight(Light *theLight)
+{
 	std::vector<Light *> newLights;
 	int n = 0;
-	for (auto it : m_lights) {
-		if (it == theLight) {
+	for (auto it : m_lights)
+	{
+		if (it == theLight)
+		{
 			n++;
 			continue;
 		}
@@ -119,21 +134,25 @@ int Node::detachLight(Light *theLight) {
 	return n;
 }
 
-void Node::attachShader(ShaderProgram *theShader) {
-	if (!theShader) {
+void Node::attachShader(ShaderProgram *theShader)
+{
+	if (!theShader)
+	{
 		fprintf(stderr, "[E] attachShader: empty shader for node %s\n", m_name.c_str());
 		exit(1);
 	}
 	m_shader = theShader;
 }
 
-ShaderProgram *Node::detachShader() {
+ShaderProgram *Node::detachShader()
+{
 	ShaderProgram *theShader = m_shader;
 	m_shader = 0;
 	return theShader;
 }
 
-ShaderProgram *Node::getShader() {
+ShaderProgram *Node::getShader()
+{
 	return m_shader;
 }
 
@@ -142,28 +161,33 @@ bool Node::getDrawBBox() const { return m_drawBBox; }
 
 bool Node::isCulled() const { return m_isCulled; }
 
-void Node::setCheckCollision(bool b) {
+void Node::setCheckCollision(bool b)
+{
 	m_checkCollision = b;
-	for(auto & theChild : m_children) {
+	for (auto &theChild : m_children)
+	{
 		theChild->setCheckCollision(b);
 	}
 }
 
 bool Node::getCheckCollision() const { return m_checkCollision; }
-const std::string & Node::getName() const {return m_name; }
+const std::string &Node::getName() const { return m_name; }
 
 ///////////////////////////////////
 // transformations
 
-void Node::initTrfm() {
+void Node::initTrfm()
+{
 	Trfm3D I;
 	m_placement->swap(I);
 	// Update Geometric state
 	updateGS();
 }
 
-void Node::setTrfm(const Trfm3D * M) {
-	if (!M) {
+void Node::setTrfm(const Trfm3D *M)
+{
+	if (!M)
+	{
 		fprintf(stderr, "[E] setTrfm: no trfm for node %s\n", m_name.c_str());
 		exit(1);
 	}
@@ -172,8 +196,10 @@ void Node::setTrfm(const Trfm3D * M) {
 	updateGS();
 }
 
-void Node::addTrfm(const Trfm3D * M) {
-	if (!M) {
+void Node::addTrfm(const Trfm3D *M)
+{
+	if (!M)
+	{
 		fprintf(stderr, "[E] addTrfm: no trfm for node %s\n", m_name.c_str());
 		exit(1);
 	}
@@ -182,31 +208,36 @@ void Node::addTrfm(const Trfm3D * M) {
 	updateGS();
 }
 
-void Node::translate(const Vector3 & P) {
+void Node::translate(const Vector3 &P)
+{
 	static Trfm3D localT;
 	localT.setTrans(P);
 	addTrfm(&localT);
 };
 
-void Node::rotateX(float angle ) {
+void Node::rotateX(float angle)
+{
 	static Trfm3D localT;
 	localT.setRotX(angle);
 	addTrfm(&localT);
 };
 
-void Node::rotateY(float angle ) {
+void Node::rotateY(float angle)
+{
 	static Trfm3D localT;
 	localT.setRotY(angle);
 	addTrfm(&localT);
 };
 
-void Node::rotateZ(float angle ) {
+void Node::rotateZ(float angle)
+{
 	static Trfm3D localT;
 	localT.setRotZ(angle);
 	addTrfm(&localT);
 };
 
-void Node::scale(float factor ) {
+void Node::scale(float factor)
+{
 	static Trfm3D localT;
 	localT.setScale(factor);
 	addTrfm(&localT);
@@ -215,8 +246,10 @@ void Node::scale(float factor ) {
 ///////////////////////////////////
 // tree operations
 
-Node *Node::parent() {
-	if (!m_parent) return this;
+Node *Node::parent()
+{
+	if (!m_parent)
+		return this;
 	return m_parent;
 }
 
@@ -225,15 +258,19 @@ Node *Node::parent() {
  *
  */
 
-Node *Node::nextSibling() {
+Node *Node::nextSibling()
+{
 	Node *p = m_parent;
-	if(!p) return this;
+	if (!p)
+		return this;
 	list<Node *>::iterator end = p->m_children.end();
 	list<Node *>::iterator it = p->m_children.begin();
-	while(it != end && *it != this) ++it;
+	while (it != end && *it != this)
+		++it;
 	assert(it != end);
 	++it;
-	if (it == end) return *(p->m_children.begin());
+	if (it == end)
+		return *(p->m_children.begin());
 	return *it;
 }
 
@@ -243,19 +280,24 @@ Node *Node::nextSibling() {
  * @param theNode A pointer to the node
  */
 
-Node *Node::firstChild() {
-	if (!m_children.size()) return this;
+Node *Node::firstChild()
+{
+	if (!m_children.size())
+		return this;
 	return *(m_children.begin());
 }
 
 // Cycle through children of a Node. Return children[ i % lenght(children) ]
 
-Node * Node::cycleChild(size_t idx) {
+Node *Node::cycleChild(size_t idx)
+{
 
 	size_t m = idx % m_children.size();
 	size_t i = 0;
-	for(auto & theChild : m_children) {
-		if (i == m) return theChild;
+	for (auto &theChild : m_children)
+	{
+		if (i == m)
+			return theChild;
 		i++;
 	}
 	return 0;
@@ -266,28 +308,34 @@ Node * Node::cycleChild(size_t idx) {
 // Add a child to node
 // Print a warning (and do nothing) if node already has an gObject.
 
-void Node::addChild(Node *theChild) {
-	if (theChild == 0) return;
-	if (m_gObject) {
+void Node::addChild(Node *theChild)
+{
+	if (theChild == 0)
+		return;
+	if (m_gObject)
+	{
 		/* =================== PUT YOUR CODE HERE ====================== */
 		// node has a gObject, so print warning
 		printf("Node already has an object!");
 
 		/* =================== END YOUR CODE HERE ====================== */
-	} else {
+	}
+	else
+	{
 		/* =================== PUT YOUR CODE HERE ====================== */
 		// node does not have gObject, so attach child
 		theChild->attachGobject(m_gObject);
 		/* =================== END YOUR CODE HERE ====================== */
-
 	}
 }
 
-void Node::detach() {
+void Node::detach()
+{
 
 	Node *theParent;
 	theParent = m_parent;
-	if (theParent == 0) return; // already detached (or root node)
+	if (theParent == 0)
+		return; // already detached (or root node)
 	m_parent = 0;
 	theParent->m_children.remove(this);
 	// Update bounding box of parent
@@ -304,7 +352,8 @@ void Node::detach() {
 //    - the BBox of thisNode's children are up-to-date.
 //    - placementWC of node and parents are up-to-date
 
-void Node::propagateBBRoot() {
+void Node::propagateBBRoot()
+{
 	/* =================== PUT YOUR CODE HERE ====================== */
 
 	/* =================== END YOUR CODE HERE ====================== */
@@ -337,7 +386,8 @@ void Node::propagateBBRoot() {
 //    See Recipe 1 at the beggining of the file in for knowing how to
 //    iterate through children.
 
-void Node::updateBB () {
+void Node::updateBB()
+{
 	/* =================== PUT YOUR CODE HERE ====================== */
 
 	/* =================== END YOUR CODE HERE ====================== */
@@ -360,7 +410,8 @@ void Node::updateBB () {
 //    See Recipe 1 at the beggining of the file in for knowing how to
 //    iterate through children.
 
-void Node::updateWC() {
+void Node::updateWC()
+{
 	/* =================== PUT YOUR CODE HERE ====================== */
 
 	/* =================== END YOUR CODE HERE ====================== */
@@ -374,12 +425,12 @@ void Node::updateWC() {
 // - Update WC transformation of sub-tree starting at node (updateWC)
 // - Propagate Bounding Box to root (propagateBBRoot), starting from the parent, if parent exists.
 
-void Node::updateGS() {
+void Node::updateGS()
+{
 	/* =================== PUT YOUR CODE HERE ====================== */
 
 	/* =================== END YOUR CODE HERE ====================== */
 }
-
 
 // @@ TODO:
 // Draw a (sub)tree.
@@ -399,57 +450,65 @@ void Node::updateGS() {
 //    See Recipe 1 at the beggining of the file in for knowing how to
 //    iterate through children.
 
-void Node::draw() {
+void Node::draw()
+{
 
 	ShaderProgram *prev_shader = 0;
 	RenderState *rs = RenderState::instance();
 
-	for(auto l : m_lights)
+	for (auto l : m_lights)
 		l->placeScene(rs->top(RenderState::modelview), *m_placementWC);
 
-	if (m_isCulled) return;
+	if (m_isCulled)
+		return;
 
 	// Set shader (save previous)
-	if (m_shader != 0) {
+	if (m_shader != 0)
+	{
 		prev_shader = rs->getShader();
 		rs->setShader(m_shader);
 	}
 
 	// Print BBoxes
-	if((rs->getBBoxDraw() || m_drawBBox) &&
-	   (this == Scene::instance()->get_display_node())) {
-		BBoxGL::draw( m_containerWC);
+	if ((rs->getBBoxDraw() || m_drawBBox) &&
+		(this == Scene::instance()->get_display_node()))
+	{
+		BBoxGL::draw(m_containerWC);
 	}
 	/* =================== PUT YOUR CODE HERE ====================== */
-	
-	//rs->addTrfm(RenderState::modelview, T);
 
-	//Push meter transformacion en la modelview
-	//si no res hoja{Dibujo el objeto geometrico}
-	//Sino llamada recursiva con los hijos
-	// pop
-	//SI el nodo tiene un objeto{gobj->draw();}
-	//else for (auto n: m_chilren){n->draw();}
-	//AL HACER ESTE COMMIT INDICAR MODO LOCAL
+	// rs->addTrfm(RenderState::modelview, T);
 
-	if(m_gObject){
-		rs->push(RenderState::modelview);
+	// Push meter transformacion en la modelview
+	// si no res hoja{Dibujo el objeto geometrico}
+	// Sino llamada recursiva con los hijos
+	//  pop
+	// SI el nodo tiene un objeto{gobj->draw();}
+	// else for (auto n: m_chilren){n->draw();}
+	// AL HACER ESTE COMMIT INDICAR MODO LOCAL
+	rs->push(RenderState::modelview);
+	if (m_gObject)
+	{
+
 		rs->addTrfm(RenderState::modelview, m_placementWC);
 		rs->loadTrfm(RenderState::model, m_placementWC);
 		m_gObject->draw();
-		rs->pop(RenderState::modelview);
 	}
-	
-	for(auto & theChild : m_children) {
-		theChild->draw();
+	else
+	{
+
+		for (auto &theChild : m_children)
+		{
+			theChild->draw();
+		}
 	}
-	
-	
-	
+	rs->pop(RenderState::modelview);
+
 	rs->pop(RenderState::modelview);
 	/* =================== END YOUR CODE HERE ====================== */
 
-	if (prev_shader != 0) {
+	if (prev_shader != 0)
+	{
 		// restore shader
 		rs->setShader(prev_shader);
 	}
@@ -457,9 +516,11 @@ void Node::draw() {
 
 // Set culled state of a node's children
 
-void Node::setCulled(bool culled) {
+void Node::setCulled(bool culled)
+{
 	m_isCulled = culled;
-	for(auto & theChild : m_children) {
+	for (auto &theChild : m_children)
+	{
 		theChild->setCulled(culled); // Recursive call
 	}
 }
@@ -467,7 +528,8 @@ void Node::setCulled(bool culled) {
 // @@ TODO: Frustum culling. See if a subtree is culled by the camera, and
 //          update m_isCulled accordingly.
 
-void Node::frustumCull(Camera *cam) {
+void Node::frustumCull(Camera *cam)
+{
 	/* =================== PUT YOUR CODE HERE ====================== */
 
 	/* =================== END YOUR CODE HERE ====================== */
@@ -484,19 +546,23 @@ void Node::frustumCull(Camera *cam) {
 //    See Recipe 1 at the beggining of the file in for knowing how to
 //    iterate through children.
 
-const Node *Node::checkCollision(const BSphere *bsph) const {
-	if (!m_checkCollision) return 0;
+const Node *Node::checkCollision(const BSphere *bsph) const
+{
+	if (!m_checkCollision)
+		return 0;
 	/* =================== PUT YOUR CODE HERE ====================== */
 
 	return 0; /* No collision */
-   /* =================== END YOUR CODE HERE ====================== */
+			  /* =================== END YOUR CODE HERE ====================== */
 }
 
-void Node::print_trfm(int sep) const {
-	std::string delim(sep,' ');
+void Node::print_trfm(int sep) const
+{
+	std::string delim(sep, ' ');
 	printf("%sNode:%s\n", delim.c_str(), m_name.c_str());
 	m_placementWC->print(delim);
-	for(auto & theChild : m_children) {
+	for (auto &theChild : m_children)
+	{
 		theChild->print_trfm(sep + 1);
 	}
 }

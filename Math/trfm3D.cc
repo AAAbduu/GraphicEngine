@@ -51,9 +51,10 @@ Vector3 Trfm3D::transformPoint(const Vector3 &P) const
 	/* =================== PUT YOUR CODE HERE ====================== */
 	for (int i = 0; i < 3; i++)
 	{
-		res[i] = P[0] * m_c1[i] * m_scl + P[1] * m_c2[i] * m_scl + P[2] * m_c3[i] * m_scl + m_tr[i];
+		res[i] = (P[0] * m_c1[i] + P[1] * m_c2[i] + P[2] * m_c3[i]) *m_scl + m_tr[i];
 	}
 	/* =================== END YOUR CODE HERE ====================== */
+	res[3] = 1;
 	return res;
 }
 
@@ -72,9 +73,10 @@ Vector3 Trfm3D::transformVector(const Vector3 &V) const
 	Trfm3D auxTrfm(*this);
 	for (int i = 0; i < 3; i++)
 	{
-		res[i] = V[0] * m_c1[i] * m_scl + V[1] * m_c2[i] * m_scl + V[2] * m_c3[i] * m_scl;
+		res[i] = (V[0] * m_c1[i] + V[1] * m_c2[i] + V[2] * m_c3[i]) * m_scl;
 	}
 	/* =================== END YOUR CODE HERE ====================== */
+	res[3] = 0;
 	return res;
 }
 
