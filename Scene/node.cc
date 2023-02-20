@@ -324,7 +324,8 @@ void Node::addChild(Node *theChild)
 	{
 		/* =================== PUT YOUR CODE HERE ====================== */
 		// node does not have gObject, so attach child
-		theChild->attachGobject(m_gObject);
+		this->m_children.push_back(theChild);
+		theChild->m_parent = this;
 		/* =================== END YOUR CODE HERE ====================== */
 	}
 }
@@ -487,11 +488,10 @@ void Node::draw()
 	// else for (auto n: m_chilren){n->draw();}
 	// AL HACER ESTE COMMIT INDICAR MODO LOCAL
 	rs->push(RenderState::modelview);
+	rs->addTrfm(RenderState::modelview, m_placement);
 	if (m_gObject)
 	{
 
-		rs->addTrfm(RenderState::modelview, m_placementWC);
-		rs->loadTrfm(RenderState::model, m_placementWC);
 		m_gObject->draw();
 	}
 	else
@@ -504,7 +504,7 @@ void Node::draw()
 	}
 	rs->pop(RenderState::modelview);
 
-	rs->pop(RenderState::modelview);
+
 	/* =================== END YOUR CODE HERE ====================== */
 
 	if (prev_shader != 0)
