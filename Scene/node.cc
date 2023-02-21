@@ -418,16 +418,18 @@ void Node::updateWC()
 
 	if (m_parent)
 	{
-		m_parent->m_placementWC->add(m_placement);
+		Trfm3D t;
+		t.clone(this->m_parent->m_placementWC);
+		t.add(this->m_placement);
+		this->m_placementWC->clone(t);
+		for (auto &child : m_children)
+		{
+			child->updateWC();
+		}
 	}
 	else
 	{
-		m_placementWC = m_placement;
-	}
-
-	for (auto &child : m_children)
-	{
-		child->updateWC();
+		this->m_placementWC->clone(this->m_placement);
 	}
 
 	/* =================== END YOUR CODE HERE ====================== */
@@ -507,6 +509,7 @@ void Node::draw()
 	if (m_gObject)
 	{
 		rs->push(RenderState::modelview);
+		this->updateWC();
 		rs->addTrfm(RenderState::modelview, m_placementWC);
 		m_gObject->draw();
 		rs->pop(RenderState::modelview);
