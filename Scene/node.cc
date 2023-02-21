@@ -326,6 +326,7 @@ void Node::addChild(Node *theChild)
 		// node does not have gObject, so attach child
 		this->m_children.push_back(theChild);
 		theChild->m_parent = this;
+		updateGS();
 		/* =================== END YOUR CODE HERE ====================== */
 	}
 }
@@ -415,6 +416,20 @@ void Node::updateWC()
 {
 	/* =================== PUT YOUR CODE HERE ====================== */
 
+	if (m_parent)
+	{
+		m_parent->m_placementWC->add(m_placement);
+	}
+	else
+	{
+		m_placementWC = m_placement;
+	}
+
+	for (auto &child : m_children)
+	{
+		child->updateWC();
+	}
+
 	/* =================== END YOUR CODE HERE ====================== */
 }
 
@@ -429,6 +444,7 @@ void Node::updateWC()
 void Node::updateGS()
 {
 	/* =================== PUT YOUR CODE HERE ====================== */
+	updateWC();
 
 	/* =================== END YOUR CODE HERE ====================== */
 }
@@ -487,12 +503,13 @@ void Node::draw()
 	// SI el nodo tiene un objeto{gobj->draw();}
 	// else for (auto n: m_chilren){n->draw();}
 	// AL HACER ESTE COMMIT INDICAR MODO LOCAL
-	rs->push(RenderState::modelview);
-	rs->addTrfm(RenderState::modelview, m_placement);
+
 	if (m_gObject)
 	{
-
+		rs->push(RenderState::modelview);
+		rs->addTrfm(RenderState::modelview, m_placement);
 		m_gObject->draw();
+		rs->pop(RenderState::modelview);
 	}
 	else
 	{
@@ -502,8 +519,7 @@ void Node::draw()
 			theChild->draw();
 		}
 	}
-	rs->pop(RenderState::modelview);
-
+	
 
 	/* =================== END YOUR CODE HERE ====================== */
 
