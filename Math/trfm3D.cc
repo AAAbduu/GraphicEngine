@@ -450,16 +450,11 @@ void Trfm3D::setRotAxis(const Vector3 &V, const Vector3 &P, float angle)
 	/* =================== PUT YOUR CODE HERE ====================== */
 
 	Trfm3D T;
-	Trfm3D aux(*this);
-
-	T.setUnit();
 
 	T.setTrans(P);
-	aux.add(T);
-	T.setRotVec(V, angle);
-	aux.add(T);
-	T.setTrans(-1 * P);
-	aux.add(T);
+	T.addRotVec(V, angle);
+	T.addTrans(Vector3(-1*P[0], -1*P[1], -1*P[2]));
+	this->add(T);
 
 	
 	/* =================== END YOUR CODE HERE ====================== */
