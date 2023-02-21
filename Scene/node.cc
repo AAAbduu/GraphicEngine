@@ -507,7 +507,7 @@ void Node::draw()
 	if (m_gObject)
 	{
 		rs->push(RenderState::modelview);
-		rs->addTrfm(RenderState::modelview, m_placement);
+		rs->addTrfm(RenderState::modelview, m_placementWC);
 		m_gObject->draw();
 		rs->pop(RenderState::modelview);
 	}
@@ -519,7 +519,6 @@ void Node::draw()
 			theChild->draw();
 		}
 	}
-	
 
 	/* =================== END YOUR CODE HERE ====================== */
 
