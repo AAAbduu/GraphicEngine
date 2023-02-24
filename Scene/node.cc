@@ -357,6 +357,14 @@ void Node::detach()
 void Node::propagateBBRoot()
 {
 	/* =================== PUT YOUR CODE HERE ====================== */
+		this->updateBB();
+		if(this->m_parent == 0){
+			return;
+		}
+
+		this->m_parent->propagateBBRoot();
+
+
 
 	/* =================== END YOUR CODE HERE ====================== */
 }
@@ -391,7 +399,19 @@ void Node::propagateBBRoot()
 void Node::updateBB()
 {
 	/* =================== PUT YOUR CODE HERE ====================== */
-
+		if(m_gObject)
+		{
+			m_containerWC->clone(m_gObject->getContainer());
+			m_containerWC->transform(m_placementWC);
+		}
+		else
+		{
+			m_containerWC->init();
+		}
+		for (auto &theChild : m_children)
+		{
+			m_containerWC->include(theChild->m_containerWC);
+		}
 	/* =================== END YOUR CODE HERE ====================== */
 }
 
@@ -416,7 +436,9 @@ void Node::updateWC()
 {
 	/* =================== PUT YOUR CODE HERE ====================== */
 
-	if (m_parent)
+	if (m_parent) //Si tiene padre, cojo la transformacion del padre, le añado la mia
+				 // y establezco la mia como la operacion de las dos
+				 // por ultimo llamo a mis hijos para que se actualicen de la misma manera
 	{
 		Trfm3D t;
 		t.clone(this->m_parent->m_placementWC);
@@ -431,7 +453,7 @@ void Node::updateWC()
 	{
 		this->m_placementWC->clone(this->m_placement);
 	}
-
+	updateBB();
 	/* =================== END YOUR CODE HERE ====================== */
 }
 
@@ -447,6 +469,10 @@ void Node::updateGS()
 {
 	/* =================== PUT YOUR CODE HERE ====================== */
 	updateWC();
+	if (m_parent)
+	{
+		m_parent->propagateBBRoot();
+	}
 
 	/* =================== END YOUR CODE HERE ====================== */
 }
@@ -559,7 +585,8 @@ void Node::frustumCull(Camera *cam)
 // Return a pointer to the Node which collides with the BSphere. 0
 // if not collision.
 //
-// Note:
+// Note: use int BSphereBBoxIntersect(const BSphere *sphere, const BBox *box)
+// 0 if interection, 1 if not.
 //
 //    See Recipe 1 at the beggining of the file in for knowing how to
 //    iterate through children.
@@ -569,7 +596,23 @@ const Node *Node::checkCollision(const BSphere *bsph) const
 	if (!m_checkCollision)
 		return 0;
 	/* =================== PUT YOUR CODE HERE ====================== */
-
+	if (BSphereBBoxIntersect(bsph, m_containerWC) == 0)
+	{
+		if (m_gObject)
+		{
+			return this;
+		}
+		else
+		{
+			for (auto &theChild : m_children)
+			{
+				if (theChild->checkCollision(bsph))
+				{
+					return theChild;
+				}
+			}
+		}
+	}
 	return 0; /* No collision */
 			  /* =================== END YOUR CODE HERE ====================== */
 }
