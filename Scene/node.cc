@@ -357,14 +357,13 @@ void Node::detach()
 void Node::propagateBBRoot()
 {
 	/* =================== PUT YOUR CODE HERE ====================== */
-		this->updateBB();
-		if(this->m_parent == 0){
-			return;
-		}
+	this->updateBB();
+	if (this->m_parent == 0)
+	{
+		return;
+	}
 
-		this->m_parent->propagateBBRoot();
-
-
+	this->m_parent->propagateBBRoot();
 
 	/* =================== END YOUR CODE HERE ====================== */
 }
@@ -399,19 +398,19 @@ void Node::propagateBBRoot()
 void Node::updateBB()
 {
 	/* =================== PUT YOUR CODE HERE ====================== */
-		if(m_gObject)
-		{
-			m_containerWC->clone(m_gObject->getContainer());
-			m_containerWC->transform(m_placementWC);
-		}
-		else
-		{
-			m_containerWC->init();
-		}
-		for (auto &theChild : m_children)
-		{
-			m_containerWC->include(theChild->m_containerWC);
-		}
+	if (m_gObject)
+	{
+		m_containerWC->clone(m_gObject->getContainer());
+		m_containerWC->transform(m_placementWC);
+	}
+	else
+	{
+		m_containerWC->init();
+	}
+	for (auto &theChild : m_children)
+	{
+		m_containerWC->include(theChild->m_containerWC);
+	}
 	/* =================== END YOUR CODE HERE ====================== */
 }
 
@@ -436,22 +435,22 @@ void Node::updateWC()
 {
 	/* =================== PUT YOUR CODE HERE ====================== */
 
-	if (m_parent) //Si tiene padre, cojo la transformacion del padre, le añado la mia
-				 // y establezco la mia como la operacion de las dos
-				 // por ultimo llamo a mis hijos para que se actualicen de la misma manera
+	if (m_parent) // Si tiene padre, cojo la transformacion del padre, le añado la mia
+				  //  y establezco la mia como la operacion de las dos
+				  //  por ultimo llamo a mis hijos para que se actualicen de la misma manera
 	{
 		Trfm3D t;
 		t.clone(this->m_parent->m_placementWC);
 		t.add(this->m_placement);
 		this->m_placementWC->clone(t);
-		for (auto &child : m_children)
-		{
-			child->updateWC();
-		}
 	}
 	else
 	{
 		this->m_placementWC->clone(this->m_placement);
+	}
+	for (auto &child : m_children)
+	{
+		child->updateWC();
 	}
 	updateBB();
 	/* =================== END YOUR CODE HERE ====================== */
@@ -593,29 +592,25 @@ void Node::frustumCull(Camera *cam)
 
 const Node *Node::checkCollision(const BSphere *bsph) const
 {
-	if (!m_checkCollision)
-		return 0;
+	if (!m_checkCollision) return 0;
 	/* =================== PUT YOUR CODE HERE ====================== */
 	if (BSphereBBoxIntersect(bsph, m_containerWC) == 0)
 	{
-		if (m_gObject)
-		{
+		if(m_gObject){		//SI soy nodo hoja, tendré un objeto geometrico y seré yo quien choque
 			return this;
 		}
-		else
+		for (auto &theChild : m_children)	//Sino será alguno de mis hijos
 		{
-			for (auto &theChild : m_children)
-			{
-				if (theChild->checkCollision(bsph))
-				{
-					return theChild;
-				}
-			}
+			const Node *n = theChild->checkCollision(bsph);
+			if (n)
+			return n;
 		}
 	}
+
 	return 0; /* No collision */
-			  /* =================== END YOUR CODE HERE ====================== */
+	/* =================== END YOUR CODE HERE ====================== */
 }
+
 
 void Node::print_trfm(int sep) const
 {
