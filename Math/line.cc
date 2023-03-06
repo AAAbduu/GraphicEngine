@@ -27,10 +27,13 @@ void Line::setFromAtoB(const Vector3 & A, const Vector3 & B) {
 	m_O = A;
 	//! A direction vector d
 	m_d = B - A;
-	m_d = m_d.normalize();
 	float mi_modulo = m_d.length();
-	if(mi_modulo < Constants::distance_epsilon)
-	printf("Están muy cerca!!");
+	if(mi_modulo < Constants::distance_epsilon){
+		printf("Están muy cerca!!");
+		return;
+	}
+
+	m_d = m_d.normalize();
 
 
 	/* =================== END YOUR CODE HERE ====================== */
@@ -53,7 +56,9 @@ Vector3 Line::at(float u) const {
 float Line::paramDistance(const Vector3 & P) const {
 	float res = 0.0f;
 	/* =================== PUT YOUR CODE HERE ====================== */
-		res = m_d.dot(P-m_O) / m_d.dot(m_d); 
+	if (m_d.dot(m_d) > Constants::distance_epsilon)
+		res = m_d.dot(P-m_O) / m_d.dot(m_d);
+		else printf("La distancia es muy cercana");
 	/* =================== END YOUR CODE HERE ====================== */
 	return res;
 }

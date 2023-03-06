@@ -183,8 +183,8 @@ void  Camera::lookAt(const Vector3 & E,
 	/* =================== PUT YOUR CODE HERE ====================== */
 		m_E = E;
 		m_D = (E - at).normalize();
-		m_R = (up.cross(m_D)).normalize();
-		m_U = (m_D.cross(m_R)).normalize();
+		m_R = (up.cross(m_D));
+		m_U = (m_D.cross(m_R));
 	/* =================== END YOUR CODE HERE ====================== */
 	setViewTrfm();
 }

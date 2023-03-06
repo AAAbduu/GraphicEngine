@@ -17,16 +17,17 @@
 
 int BSpherePlaneIntersect(const BSphere *bs, Plane *pl) {
 	/* =================== PUT YOUR CODE HERE ====================== */
-	float distance  =  pl->signedDistance(bs->getPosition());
+	float distance  =  abs(pl->signedDistance(bs->getPosition()));
 
 	if(bs->getRadius() >= abs(distance)){
 		return IINTERSECT;
 
+	}else{
+		if(pl->whichSide(bs->getPosition()) == 1){
+			return IREJECT; //Lado positivo
+		}
+		return -IREJECT; //Lado negativo
 	}
-	if(distance < 0){
-		return -IREJECT;
-	}
-	return IREJECT;
 
 	/* =================== END YOUR CODE HERE ====================== */
 }
