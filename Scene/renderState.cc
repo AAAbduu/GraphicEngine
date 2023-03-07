@@ -209,6 +209,19 @@ const Vector3 &RenderState::getSceneAmbient() const {
 	return m_ambient;
 }
 
+////////////////////////////////////////////////////////
+// Funciones para el ejemplo del shader de animacion //
+//////////////////////////////////////////////////////
+
+float RenderState::getSc()const{
+	return m_sc;
+}
+
+void RenderState::setSc(float sc){
+	m_sc = sc;
+};
+
+
 void RenderState::print() const {
 	printf("* Stacks\n");
 	printf("texture:\n");
