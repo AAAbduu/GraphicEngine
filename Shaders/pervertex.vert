@@ -36,18 +36,31 @@ float lambertFactor(in vec3 L, in vec3 N) {
 	return max(dot(L, N), 0.0);
 }
 
+float specularFactor(const vec3 n, const vec3 l, const vec3 v, const float m) {
+	// n es el vector normal
+	// l es el vector de la luz
+	// v es el vector que va a la cámara
+	// m es el brillo del material
+	// (theMaterial.shininess)
+	float dotNL = dot(n, l); // 
+	vec3 r = (2*dotNL)*n - l;
+	r = normalize(r);		//IMportante normalizar el vector
+	float dotProd = dot(r, v);
+	return max(dotNL, 0.0) * pow(max(dotProd, 0.0), m);
+}
+
 
 void main() {
 
 	vec3 L;
 
 	vec3 difuso = vec3(0.0);
-	vec3 especular = vec3(0.0);
 
+	// factor_difuso = n dot l (ya calculado)
+	vec3 i_especular = vec3(0.0);
 	
-
 	f_color = vec4(scene_ambient,1.0);
-	f_texCoord = v_texCoord;
+	
 
 
 	//CACULAR LA POSICION DEL VERTICE EN EL ESPACIO DEL MODELO DE LA CAMARA
@@ -56,23 +69,29 @@ void main() {
 	//PASAR LA NORMAL DEL VERTICE AL ESPACIO DE LA CAMARA
 	vec4 normalEye4 = normalize((modelToCameraMatrix * vec4(v_normal, 0.0)));
 
+	vec3 vE = normalize(-posEye4.xyz); // vector de la camara al vertice
+
 	//PARA TODAS LAS LUCES{
 		for (int i = 0; i < active_lights_n; i++) {
 			
 			//CALCULAR EL VECTOR LUMINOSO
 		//SI ES DIRECCIONAL
 			if(theLights[i].position.w == 0.0)
-				L = normalize(-theLights[i].position.xyz);
+				L = -1.0 * normalize(theLights[i].position.xyz);
 			else
 				//posicional o spotlight
 				L = normalize(theLights[i].position.xyz - posEye4.xyz);
 
-		//calcular la componente especular
+		
 
-		difuso += lambertFactor(L, v_normal) * theMaterial.diffuse * theLights[i].diffuse;
+		difuso += lambertFactor(L, v_normal) * theMaterial.diffuse * theLights[i].diffuse; //calcular la componente difusa
+		i_especular += specularFactor(normalEye4.xyz, L, vE, theMaterial.shininess) * theMaterial.specular * theLights[i].specular; //calcular la componente especular
 	}
 
-	//CAlcula y asigna la componente difusa
-	f_color = vec4(scene_ambient + difuso, 1.0);
+	//sumamos la componente difusa y especular
+	f_color += vec4(difuso,1.0);
+	f_color += vec4(i_especular,1.0);
+
+	f_texCoord = v_texCoord;
 	gl_Position = modelToClipMatrix * vec4(v_position, 1);
 }

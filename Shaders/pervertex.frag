@@ -13,5 +13,4 @@ void main() {
 	gl_FragColor = vec4(f_color);
 	//aplico el color al pixel
 
-
 }
