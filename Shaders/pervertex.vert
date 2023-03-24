@@ -53,11 +53,12 @@ float specularFactor(const vec3 n, const vec3 l, const vec3 v, const float m) {
 void main() {
 
 	vec3 L;
-
+	// factor_difuso = n dot l (ya calculado)
 	vec3 difuso = vec3(0.0);
 
-	// factor_difuso = n dot l (ya calculado)
 	vec3 i_especular = vec3(0.0);
+
+	float factor_atenuacion;
 	
 	f_color = vec4(scene_ambient,1.0);
 	
@@ -73,19 +74,48 @@ void main() {
 
 	//PARA TODAS LAS LUCES{
 		for (int i = 0; i < active_lights_n; i++) {
+			factor_atenuacion = 1.0;
 			
 			//CALCULAR EL VECTOR LUMINOSO
 		//SI ES DIRECCIONAL
-			if(theLights[i].position.w == 0.0)
+			if(theLights[i].position.w == 0.0){
 				L = -1.0 * normalize(theLights[i].position.xyz);
-			else
+				difuso += lambertFactor(L, v_normal) * theMaterial.diffuse * theLights[i].diffuse ; //calcular la componente difusa
+				i_especular += specularFactor(normalEye4.xyz, L, vE, theMaterial.shininess) * theMaterial.specular * theLights[i].specular;
+			}else{
 				//posicional o spotlight
-				L = normalize(theLights[i].position.xyz - posEye4.xyz);
+				L = (theLights[i].position.xyz - posEye4.xyz);
+				float distance = length(L);
+				L = normalize(L);
+				
+				float denominador = (theLights[i].attenuation.x + theLights[i].attenuation.y * distance + theLights[i].attenuation.z * distance * distance);
+				if(denominador > 0.0){
+					factor_atenuacion = 1.0/denominador;
+				}
 
+				//si la luz es posicional
+				if(theLights[i].cosCutOff == 0.0){
+					difuso += lambertFactor(L, v_normal) * theMaterial.diffuse * theLights[i].diffuse * factor_atenuacion; //calcular la componente difusa
+					i_especular += specularFactor(normalEye4.xyz, L, vE, theMaterial.shininess) * theMaterial.specular * theLights[i].specular * factor_atenuacion;
+
+				}
+				//si la luz es foco
+				if(theLights[i].cosCutOff > 0.0){
+					float cspot = dot((theLights[i].spotDir), -L);
+					if(cspot > theLights[i].cosCutOff){
+						float calculo = pow(cspot, theLights[i].exponent);
+						difuso += lambertFactor(L, v_normal) * theMaterial.diffuse * theLights[i].diffuse * calculo; //calcular la componente difusa
+						i_especular += specularFactor(normalEye4.xyz, L, vE, theMaterial.shininess) * theMaterial.specular * theLights[i].specular * calculo; //calcular la componente especular
+					}
+
+
+				}
+			}
+				
 		
+		//difuso += lambertFactor(L, v_normal) * theMaterial.diffuse * theLights[i].diffuse * factor_atenuacion; //calcular la componente difusa
+		//i_especular += specularFactor(normalEye4.xyz, L, vE, theMaterial.shininess) * theMaterial.specular * theLights[i].specular * factor_atenuacion; //calcular la componente especular
 
-		difuso += lambertFactor(L, v_normal) * theMaterial.diffuse * theLights[i].diffuse; //calcular la componente difusa
-		i_especular += specularFactor(normalEye4.xyz, L, vE, theMaterial.shininess) * theMaterial.specular * theLights[i].specular; //calcular la componente especular
 	}
 
 	//sumamos la componente difusa y especular
