@@ -80,7 +80,7 @@ void main() {
 		//SI ES DIRECCIONAL
 			if(theLights[i].position.w == 0.0){
 				L = -1.0 * normalize(theLights[i].position.xyz);
-				difuso += lambertFactor(L, v_normal) * theMaterial.diffuse * theLights[i].diffuse ; //calcular la componente difusa
+				difuso += lambertFactor(L, normalEye4.xyz) * theMaterial.diffuse * theLights[i].diffuse ; //calcular la componente difusa
 				i_especular += specularFactor(normalEye4.xyz, L, vE, theMaterial.shininess) * theMaterial.specular * theLights[i].specular;
 			}else{
 				//posicional o spotlight
@@ -95,7 +95,7 @@ void main() {
 
 				//si la luz es posicional
 				if(theLights[i].cosCutOff == 0.0){
-					difuso += lambertFactor(L, v_normal) * theMaterial.diffuse * theLights[i].diffuse * factor_atenuacion; //calcular la componente difusa
+					difuso += lambertFactor(L, normalEye4.xyz) * theMaterial.diffuse * theLights[i].diffuse * factor_atenuacion; //calcular la componente difusa
 					i_especular += specularFactor(normalEye4.xyz, L, vE, theMaterial.shininess) * theMaterial.specular * theLights[i].specular * factor_atenuacion;
 
 				}
@@ -104,7 +104,7 @@ void main() {
 					float cspot = dot((theLights[i].spotDir), -L);
 					if(cspot > theLights[i].cosCutOff){
 						float calculo = pow(cspot, theLights[i].exponent);
-						difuso += lambertFactor(L, v_normal) * theMaterial.diffuse * theLights[i].diffuse * calculo; //calcular la componente difusa
+						difuso += lambertFactor(L, normalEye4.xyz) * theMaterial.diffuse * theLights[i].diffuse * calculo; //calcular la componente difusa
 						i_especular += specularFactor(normalEye4.xyz, L, vE, theMaterial.shininess) * theMaterial.specular * theLights[i].specular * calculo; //calcular la componente especular
 					}
 
