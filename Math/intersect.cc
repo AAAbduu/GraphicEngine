@@ -58,36 +58,35 @@ int  BBoxBBoxIntersect(const BBox *bba, const BBox *bbb ) {
 //   +IREJECT outside
 //   -IREJECT inside
 //    IINTERSECT intersect
+// Don`t use bruteforce approach
 
 int  BBoxPlaneIntersect (const BBox *theBBox, Plane *thePlane) {
 	/* =================== PUT YOUR CODE HERE ====================== */
-		Vector3 pMax= theBBox->m_max;
-		Vector3 pMin= theBBox->m_min;
+		Vector3 max = theBBox->m_max;
+		Vector3 min = theBBox->m_min;
+		Vector3 v1 = Vector3(min[0], min[1], min[2]);
+		Vector3 v2 = Vector3(min[0], min[1], max[2]);
+		Vector3 v3 = Vector3(min[0], max[1], min[2]);
+		Vector3 v4 = Vector3(min[0], max[1], max[2]);
+		Vector3 v5 = Vector3(max[0], min[1], min[2]);		//cojo los 8 vertices del BBOX
+		Vector3 v6 = Vector3(max[0], min[1], max[2]);
+		Vector3 v7 = Vector3(max[0], max[1], min[2]);
+		Vector3 v8 = Vector3(max[0], max[1], max[2]);
 
-		Vector3 pMin2 = theBBox->m_min;
-		pMin2[0] = pMax[0];
-		pMin2[2] = pMax[2];
+		int contLados = 0;
+		if(thePlane->whichSide(v1) == 1) contLados++;
+		if(thePlane->whichSide(v2) == 1) contLados++;
+		if(thePlane->whichSide(v3) == 1) contLados++;
+		if(thePlane->whichSide(v4) == 1) contLados++;
+		if(thePlane->whichSide(v5) == 1) contLados++;			//cuento cuantos vertices estan del lado positivo del plano
+		if(thePlane->whichSide(v6) == 1) contLados++;
+		if(thePlane->whichSide(v7) == 1) contLados++;
+		if(thePlane->whichSide(v8) == 1) contLados++;
 
-		Vector3 pMax2 = theBBox->m_max;
-		pMax2[0] = pMin[0];
-		pMax2[2] = pMin[2];
+		if(contLados == 8) return IREJECT; 		//si todos estan del lado positivo
+		if(contLados == 0) return -IREJECT;		//si todos estan del lado negativo
+		return IINTERSECT;						//si hay alguno de cada lado, INTERESECCIÓN
 
-		float distMax = thePlane->signedDistance(pMax);
-
-		float distMin = thePlane->signedDistance(pMin);
-
-		float distMax2 = thePlane->signedDistance(pMax2);
-
-		float distMin2 = thePlane->signedDistance(pMin2);
-
-		if ((distMin >= 0 && distMax <= 0) || (distMin <= 0 && distMax >= 0)) return IINTERSECT;
-
-		if ((distMin2 >= 0 && distMax2 <= 0) || (distMin2 <= 0 && distMax2 >= 0)) return IINTERSECT;
-
-		
-		if (distMin < 0 and distMax < 0) return -IREJECT;
-
-		return IREJECT;
 
 	/* =================== END YOUR CODE HERE ====================== */
 }
