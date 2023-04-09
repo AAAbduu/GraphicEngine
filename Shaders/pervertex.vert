@@ -68,7 +68,7 @@ void main() {
 	vec4 posEye4 = modelToCameraMatrix * vec4(v_position, 1.0);
 
 	//PASAR LA NORMAL DEL VERTICE AL ESPACIO DE LA CAMARA
-	vec4 normalEye4 = normalize((modelToCameraMatrix * vec4(v_normal, 0.0)));
+	vec4 normalEye4 = normalize((modelToCameraMatrix * vec4(v_normal, 0.0))); 
 
 	vec3 vE = normalize(-posEye4.xyz); // vector de la camara al vertice
 
@@ -79,7 +79,7 @@ void main() {
 			//CALCULAR EL VECTOR LUMINOSO
 		//SI ES DIRECCIONAL
 			if(theLights[i].position.w == 0.0){
-				L = -1.0 * normalize(theLights[i].position.xyz);
+				L = normalize(-1.0 * theLights[i].position.xyz);
 				difuso += lambertFactor(L, normalEye4.xyz) * theMaterial.diffuse * theLights[i].diffuse ; //calcular la componente difusa
 				i_especular += specularFactor(normalEye4.xyz, L, vE, theMaterial.shininess) * theMaterial.specular * theLights[i].specular;
 			}else{
