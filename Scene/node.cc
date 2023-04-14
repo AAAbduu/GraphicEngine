@@ -570,13 +570,33 @@ void Node::setCulled(bool culled)
 
 // @@ TODO: Frustum culling. See if a subtree is culled by the camera, and
 //          update m_isCulled accordingly.
+// Hay que usar la funcion checkFrustum de la clase Camera que devuelve los
+// siguientes valores: 1 si el BBOX esta fuera del frustum
+// 0 si el BBOX corta el frustum
+// -1 si el BBOX se encuentra dentro del frustum
 
 void Node::frustumCull(Camera *cam)
 {
 	/* =================== PUT YOUR CODE HERE ====================== */
+	if (cam->checkFrustum(m_containerWC, 0) == 1) // Si el BBOX esta fuera del frustum, 
+	{
+		m_isCulled = true;						 // el nodo esta oculto para la vision de la camara
+	}
+	else
+	{
+		m_isCulled = false;						// el nodo es visible para la camara, parcial o totalmente, con lo cual se dibujará
+		for (auto &theChild : m_children)
+		{
+			theChild->frustumCull(cam);			// Llamada recursiva para los hijos
+		}
+	}
 
 	/* =================== END YOUR CODE HERE ====================== */
 }
+
+
+
+
 
 // @@ TODO: Check whether a BSphere (in world coordinates) intersects with a
 // (sub)tree.

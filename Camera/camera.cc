@@ -312,6 +312,36 @@ int Camera::checkFrustum(const BBox *theBBox,
 						 unsigned int *planesBitM) {
 	int res = -1; // by default, BBOX fully inside
 	/* =================== PUT YOUR CODE HERE ====================== */
+	//Calcularemos todas las esquinas del bbox que recibimos
+	Vector3 esquinas[8];
+	esquinas[0] = Vector3(theBBox->m_min[0], theBBox->m_min[1], theBBox->m_min[2]);
+	esquinas[1] = Vector3(theBBox->m_min[0], theBBox->m_min[1], theBBox->m_max[2]);
+	esquinas[2] = Vector3(theBBox->m_min[0], theBBox->m_max[1], theBBox->m_min[2]);
+	esquinas[3] = Vector3(theBBox->m_min[0], theBBox->m_max[1], theBBox->m_max[2]);
+	esquinas[4] = Vector3(theBBox->m_max[0], theBBox->m_min[1], theBBox->m_min[2]);
+	esquinas[5] = Vector3(theBBox->m_max[0], theBBox->m_min[1], theBBox->m_max[2]);
+	esquinas[6] = Vector3(theBBox->m_max[0], theBBox->m_max[1], theBBox->m_min[2]);
+	esquinas[7] = Vector3(theBBox->m_max[0], theBBox->m_max[1], theBBox->m_max[2]);
+
+	//Por cada plano, comprobaremos si hay interseccion, si esta completamente dentro o fuera
+	for (int i = 0; i < MAX_CLIP_PLANES; i++){
+		int dentro = 0;
+		int fuera = 0;
+		for (int j = 0; j < 8; j++){
+			float distancia = m_fPlanes[i]->signedDistance(esquinas[j]); //Calculamos la distancia con signo del punto a cada plano, la normal de los planos del frustum apuntan hacia fuera
+			if (distancia < 0){
+				dentro++;
+			}
+			else{
+				fuera++;
+			}
+		}
+		if (fuera == 8){
+			return 1; //El bbox esta fuera del frustum, basta con que para uno de los planos, todos los puntos esten fuera
+		}
+
+
+	}
 
 	/* =================== END YOUR CODE HERE ====================== */
 	return res; // BBox is fully inside the frustum
