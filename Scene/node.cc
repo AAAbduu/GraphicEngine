@@ -578,25 +578,22 @@ void Node::setCulled(bool culled)
 void Node::frustumCull(Camera *cam)
 {
 	/* =================== PUT YOUR CODE HERE ====================== */
-	if (cam->checkFrustum(m_containerWC, 0) == 1) // Si el BBOX esta fuera del frustum, 
+	int resFrustum = cam->checkFrustum(m_containerWC, 0);
+	if (resFrustum == 1) // Si el BBOX esta fuera del frustum,
 	{
-		m_isCulled = true;						 // el nodo esta oculto para la vision de la camara
+		m_isCulled = true; // el nodo esta oculto para la vision de la camara
 	}
-	else
-	{
-		m_isCulled = false;						// el nodo es visible para la camara, parcial o totalmente, con lo cual se dibujará
+	else if(resFrustum == -1){ //si esta completamente dentro del frustum
+		m_isCulled = false;
+	}else{ //Si intersecta con el frustum
+		m_isCulled = false;
 		for (auto &theChild : m_children)
 		{
-			theChild->frustumCull(cam);			// Llamada recursiva para los hijos
+			theChild->frustumCull(cam); // Llamada recursiva para los hijos
 		}
 	}
-
 	/* =================== END YOUR CODE HERE ====================== */
 }
-
-
-
-
 
 // @@ TODO: Check whether a BSphere (in world coordinates) intersects with a
 // (sub)tree.
@@ -612,25 +609,26 @@ void Node::frustumCull(Camera *cam)
 
 const Node *Node::checkCollision(const BSphere *bsph) const
 {
-	if (!m_checkCollision) return 0;
+	if (!m_checkCollision)
+		return 0;
 	/* =================== PUT YOUR CODE HERE ====================== */
 	if (BSphereBBoxIntersect(bsph, m_containerWC) == 0)
 	{
-		if(m_gObject){		//SI soy nodo hoja, tendré un objeto geometrico y seré yo quien choque
+		if (m_gObject)
+		{ // SI soy nodo hoja, tendré un objeto geometrico y seré yo quien choque
 			return this;
 		}
-		for (auto &theChild : m_children)	//Sino será alguno de mis hijos
+		for (auto &theChild : m_children) // Sino será alguno de mis hijos
 		{
 			const Node *n = theChild->checkCollision(bsph);
 			if (n)
-			return n;
+				return n;
 		}
 	}
 
 	return 0; /* No collision */
-	/* =================== END YOUR CODE HERE ====================== */
+			  /* =================== END YOUR CODE HERE ====================== */
 }
-
 
 void Node::print_trfm(int sep) const
 {
