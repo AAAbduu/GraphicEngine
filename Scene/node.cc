@@ -581,10 +581,11 @@ void Node::frustumCull(Camera *cam)
 	int resFrustum = cam->checkFrustum(m_containerWC, 0);
 	if (resFrustum == 1) // Si el BBOX esta fuera del frustum,
 	{
-		m_isCulled = true; // el nodo esta oculto para la vision de la camara
+		setCulled(true); // Se oculta para la camara y tambien todos sus hijos
+
 	}
 	else if(resFrustum == -1){ //si esta completamente dentro del frustum
-		m_isCulled = false;
+		setCulled(false);
 	}else{ //Si intersecta con el frustum
 		m_isCulled = false;
 		for (auto &theChild : m_children)
