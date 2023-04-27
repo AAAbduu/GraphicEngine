@@ -211,6 +211,15 @@ public:
 
 	void print() const;
 
+	////////////////////////////////////////////////////////
+	// Funciones para el shader de animacion multitex    //
+	//////////////////////////////////////////////////////
+
+	void setCloudsOffset(float cloudsOffset);
+
+	float getCloudsOffset()const;
+	
+
 private:
 	RenderState();
 	~RenderState();
@@ -255,4 +264,8 @@ private:
 
 	//Variable para el ejemplo del shader de animacion
 	float m_sc;
+
+
+	//Variable para el shader pervertex_multitex.frag
+	float m_cloudsOffset;
 };

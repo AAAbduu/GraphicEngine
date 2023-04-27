@@ -221,6 +221,17 @@ void RenderState::setSc(float sc){
 	m_sc = sc;
 };
 
+////////////////////////////////////////////////////////
+// Funciones para el shader de animacion multitex    //
+//////////////////////////////////////////////////////
+
+void RenderState::setCloudsOffset(float offset){
+	m_cloudsOffset = offset;
+}
+
+float RenderState::getCloudsOffset() const{
+	return m_cloudsOffset;
+}
 
 void RenderState::print() const {
 	printf("* Stacks\n");

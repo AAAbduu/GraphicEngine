@@ -516,6 +516,8 @@ void animate(int value) {
 
 		RenderState::instance()->setSc(t);
 
+		RenderState::instance()->setCloudsOffset(t * 0.25); // multiplicado por 0.25 para que se mueva mas lento
+
 		glutPostRedisplay();
 	}
 	// ##### END OF GAME/APP MAIN CODE #####

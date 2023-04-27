@@ -199,6 +199,7 @@ void ShaderProgram::beforeDraw() {
 
 	Material *mat;
 	Texture *tex;
+	Texture *tex2; //definimos una segunda textura
 	RenderState *rs = RenderState::instance();
 	static char buffer[1024];
 
@@ -256,6 +257,14 @@ void ShaderProgram::beforeDraw() {
 			// Set texture to unit 'Constants::gl_texunits::texture'
 			tex->bindGLUnit(Constants::gl_texunits::texture);
 			this->send_uniform("texture0", Constants::gl_texunits::texture);
+		}
+		if(this->has_capability("multitex")){ // Si tiene capacidad de multitextura
+			tex2 = mat->getTexture(1);
+			if(tex2 !=0){ //comprobar que la textura no es nula
+				tex2->bindGLUnit(Constants::gl_texunits::rest); //asignar la textura a la unidad de textura rest
+				this->send_uniform("texture1", Constants::gl_texunits::rest); //enviar la unidad de textura rest al shader
+				this->send_uniform("uCloudOffset", rs->getCloudsOffset()); //enviar el offset de la nube al shader
+			} 
 		}
 		if (this->has_capability("bump")) {
 			tex = mat->getBumpMap();

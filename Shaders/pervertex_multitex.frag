@@ -15,5 +15,11 @@ void main() {
 	//
 	// color = 0.5 * color_of_texture0 + 0.5 * color_of_texture1
 
-	gl_FragColor = vec4(1.0);
+	// Aplicamos el offset a la textura de las nubes
+	vec2 texture1Offset = f_texCoord + vec2(uCloudOffset, 0.0);
+
+	vec4 color_textura = 0.65 * texture2D(texture0, f_texCoord) + 0.35 * texture2D(texture1, texture1Offset);
+
+
+	gl_FragColor = color_textura * f_color; //como lo hacemos en el fragment shader
 }
