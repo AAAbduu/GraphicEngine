@@ -58,7 +58,7 @@ void main() {
 
 	vec4 f_color;
 
-	f_color = vec4(scene_ambient,1.0);
+	f_color = vec4(0.0);
 
 
 	//PARA TODAS LAS LUCES{
@@ -107,11 +107,11 @@ void main() {
 
 
 	//sumamos la componente difusa y especular
-	f_color += vec4(difuso * theMaterial.diffuse,1.0);
-	f_color += vec4(i_especular * theMaterial.specular,1.0);
+	vec4 color_textura = texture2D(texture0, f_texCoord);
+	f_color += vec4((scene_ambient + difuso * theMaterial.diffuse) * color_textura.rgb,1.0);
+	f_color += vec4(i_especular * theMaterial.specular,theMaterial.alpha);
 	//f_color += vec4(i_especular * theMaterial.specular,1.0);
 
-	vec4 color_textura = texture2D(texture0, f_texCoord);
-	gl_FragColor = f_color * color_textura;
+	gl_FragColor = f_color;
 
 }
