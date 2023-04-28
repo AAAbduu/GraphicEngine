@@ -16,3 +16,4 @@ CMakeCache.txt
 compile_commands.json
 Makefile
 .vscode/settings.json
+./obj/leeperry/*
