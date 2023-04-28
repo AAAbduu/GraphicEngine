@@ -17,3 +17,9 @@ compile_commands.json
 Makefile
 .vscode/settings.json
 ./obj/leeperry/*
+obj/leeperry/lambertian.jpg
+.gitignore
+.gitignore
+obj/leeperry/leeperry.obj
+obj/leeperry/lee_normalmap.jpg
+obj/leeperry/leeperry.mtl
