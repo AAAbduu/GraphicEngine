@@ -258,6 +258,12 @@ void ShaderProgram::beforeDraw() {
 			tex->bindGLUnit(Constants::gl_texunits::texture);
 			this->send_uniform("texture0", Constants::gl_texunits::texture);
 		}
+		if(has_capability("specmap")){ 
+			tex=mat->getSpecularMap(); 
+			if(tex!=0){ 
+			tex->bindGLUnit(Constants::gl_texunits::specular); 
+			this->send_uniform("specmap", Constants::gl_texunits::specular); } 
+		}
 		if(this->has_capability("multitex")){ // Si tiene capacidad de multitextura
 			tex2 = mat->getTexture(1);
 			if(tex2 !=0){ //comprobar que la textura no es nula
