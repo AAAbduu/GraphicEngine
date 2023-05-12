@@ -40,9 +40,9 @@ float specularFactor(const vec3 n, const vec3 l, const vec3 v, const float m) {
 	// (theMaterial.shininess)
 	//Modelo blin-phong
 	vec3 h = normalize(l + v);
-	return pow(max(dot(n, h), 0.0), 4*m);
+	if (dot(n, h) <= 0.0) return 0.0;
+	return pow(dot(n, h), 4*m);
 }
-
 
 void main() {
 	vec3 N = normalize(f_normal); //normal del vertice en el fragmento en coordenadas de camara
