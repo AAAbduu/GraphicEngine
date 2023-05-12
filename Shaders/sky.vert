@@ -10,6 +10,6 @@ attribute vec3 v_position;
 varying vec3 f_texCoord; // Note: texture coordinates is vec3
 
 void main() {
-
+	f_texCoord = vec3(v_position.x, v_position.y, -1.0 * v_position.z);
 	gl_Position = modelToClipMatrix * vec4(v_position, 1.0);
 }

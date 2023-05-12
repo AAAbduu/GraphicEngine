@@ -200,6 +200,7 @@ void ShaderProgram::beforeDraw() {
 	Material *mat;
 	Texture *tex;
 	Texture *tex2; //definimos una segunda textura
+	Texture *envMap; //Definimos una textura para el environment map
 	RenderState *rs = RenderState::instance();
 	static char buffer[1024];
 
@@ -281,6 +282,15 @@ void ShaderProgram::beforeDraw() {
 			}
 		}
 	}
+	if (this->has_capability("cube_env")) {
+			envMap = TextureManager::instance()->find("CubeEnv");
+			if (envMap != 0) {
+				envMap->bindGLUnit(Constants::gl_texunits::envmap);
+				this->send_uniform("envmap", Constants::gl_texunits::envmap);
+				Vector3 campos = rs->getCamera()->getPosition();
+				this->send_uniform("campos", campos);
+			}
+		}
 }
 
 void ShaderProgram::print() const {

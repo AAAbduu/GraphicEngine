@@ -21,4 +21,14 @@ varying vec3 f_normalw;   // world space
 
 void main() {
 	gl_Position = modelToClipMatrix * vec4(v_position, 1.0);
+	////////////////////////////////Variables varying/////////////////////////////////////
+	//al espacio de la camara
+	f_normal = normalize((modelToCameraMatrix * vec4(v_normal, 0.0)).xyz);
+	f_position = (modelToCameraMatrix * vec4(v_position, 1.0)).xyz;
+	f_viewDirection = -f_position;
+	f_texCoord = v_texCoord;
+	//al espacio del mundo
+	f_normalw = (modelToWorldMatrix * vec4(v_normal, 0.0)).xyz;
+	f_positionw = (modelToWorldMatrix * vec4(v_position, 1.0)).xyz;
 }
+

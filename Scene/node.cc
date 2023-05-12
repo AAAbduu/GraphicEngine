@@ -536,6 +536,7 @@ void Node::draw()
 		rs->push(RenderState::modelview);
 		this->updateWC();
 		rs->addTrfm(RenderState::modelview, m_placementWC);
+		rs->loadTrfm(RenderState::model, m_placementWC); //añado esta línea para la practica de cubeMapping
 		m_gObject->draw();
 		rs->pop(RenderState::modelview);
 	}

@@ -64,6 +64,18 @@ void CreateSkybox(GObject *gobj,
 	}
 	/* =================== PUT YOUR CODE HERE ====================== */
 
+	Material *matName = MaterialManager::instance()->create("matName");
+	matName->setTexture(ctex);
+	gobj->setMaterial(matName);
+
+	Node *newNode = NodeManager::instance()->create("nodeName");
+	newNode->attachShader(skyshader);
+	newNode->attachGobject(gobj);
+
+	RenderState::instance()->setSkybox(newNode);
+
+
+
 	/* =================== END YOUR CODE HERE ====================== */
 }
 
@@ -104,6 +116,24 @@ void DisplaySky(Camera *cam) {
 	if (!skynode) return;
 
 	/* =================== PUT YOUR CODE HERE ====================== */
+
+	ShaderProgram *prevShader = rs->getShader();
+	rs->push(RenderState::modelview);
+	Trfm3D trans = Trfm3D();
+
+	trans.addTrans(cam->getPosition());
+
+	rs->addTrfm(RenderState::modelview, &trans);
+
+
+	glDisable(GL_DEPTH_TEST);
+	rs->setShader(skynode->getShader());
+	skynode->getGobject()->draw();
+	glEnable(GL_DEPTH_TEST);
+	rs->setShader(prevShader);
+	rs->pop(RenderState::modelview);
+
+
 
 	/* =================== END YOUR CODE HERE ====================== */
 }
