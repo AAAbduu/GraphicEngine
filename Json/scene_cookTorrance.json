@@ -81,6 +81,13 @@
       "name" : "sky",
       "vshader" : "Shaders/sky.vert",
       "fshader" : "Shaders/sky.frag"
+    },
+    {
+      "name":"cookT",
+      "vshader":"Shaders/cookTorrance.vert",
+      "fshader":"Shaders/cookTorrance.frag",
+      "uniforms" : [ {"name" : "roughness", "type" : "ufloat"} ],
+      "capabilities" : [ "roughness" ]
     }
   ],
   "lights" : [
@@ -125,7 +132,7 @@
   "node" : {
     "name" : "root",
     "trfm" : [ { "trans" : [0, -10, -100] } ],
-    "shader" : "perfragment",
+    "shader" : "cookT",
     "children" : [
 	    {
         "name" : "sphereRusted",

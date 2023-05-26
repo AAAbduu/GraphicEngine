@@ -106,6 +106,22 @@
     "name" : "sky",
     "vshader" : "Shaders/sky.vert",
     "fshader" : "Shaders/sky.frag"
+  },{
+    "name" : "cookTorranceT",
+    "vshader" : "Shaders/cookTorranceT.vert",
+    "fshader" : "Shaders/cookTorranceT.frag",
+    "uniforms": [ {"name":"albedo", "type":"usampler"},
+                  {"name": "roughness", "type": "usampler"},
+                  {"name": "normal", "type": "usampler"}
+                ],
+    "capabilities": ["albedoMap", "roughnessMap", "normalMap"]
+  },
+  {
+    "name":"cookT",
+    "vshader":"Shaders/cookTorrance.vert",
+    "fshader":"Shaders/cookTorrance.frag",
+    "uniforms" : [ {"name" : "roughness", "type" : "ufloat"} ],
+    "capabilities" : [ "roughness" ]
   }
   ],
   "lights" : [
@@ -149,12 +165,13 @@
   "node" : {
     "name" : "root",
     "trfm" : [ { "trans" : [0, -10, -100] } ],
-    "shader" : "perfragment",
+    "shader" : "cookT",
     "children" : [
 	    {
       "name" : "sphereRusted",
       "gObj" : "./obj/rustedSphere/sphereRusted.obj",
-      "trfm" : [ { "trans" : [-20, 0, 0] } ]
+      "trfm" : [ { "trans" : [-20, 0, 0] } ],
+      "shader" : "cookTorranceT"
     },
 	    {
       "name" : "teapotUrdina",
