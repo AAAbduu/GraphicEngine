@@ -146,7 +146,7 @@ void main(){
 				}
 				//si la luz es foco
 				if(theLights[i].cosCutOff>0){
-					float cspot = dot((theLights[i].spotDir), -L);
+					float cspot = dot(normalize(f_spotDirection[i]), -L);
 					if(cspot > theLights[i].cosCutOff){
 						float calculo = pow(cspot, theLights[i].exponent);
 						vec3 H = normalize(L + V); //calcular el vector medio
